@@ -349,7 +349,7 @@
     /* ========== DATE STATS CARDS ========== */
     .date-stats-cards {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -760,6 +760,8 @@
             <div class="edit-tab active" data-data="1105">Segunda-feira</div>
             <div class="edit-tab" data-data="1205">Terça-feira</div>
             <div class="edit-tab" data-data="1305">Quarta-feira</div>
+            <div class="edit-tab" data-data="1405">Quinta-feira</div>
+            <div class="edit-tab" data-data="1505">Sexta-feira</div>
           </div>
 
           <div id="edit-1105" class="edit-data active">
@@ -802,6 +804,34 @@
                 </tr>
               </thead>
               <tbody id="edit-1305-body"></tbody>
+            </table>
+          </div>
+          <div id="edit-1405" class="edit-data">
+            <table class="edit-table">
+              <thead>
+                <tr>
+                  <th>Empresa</th>
+                  <th>Monitor</th>
+                  <th>Pré-nota</th>
+                  <th>Robô</th>
+                  <th style="background:#FFF0EB;color:#FF6934">⚠️ Robô ≤ Monitor</th>
+                </tr>
+              </thead>
+              <tbody id="edit-1405-body"></tbody>
+            </table>
+          </div>
+          <div id="edit-1505" class="edit-data">
+            <table class="edit-table">
+              <thead>
+                <tr>
+                  <th>Empresa</th>
+                  <th>Monitor</th>
+                  <th>Pré-nota</th>
+                  <th>Robô</th>
+                  <th style="background:#FFF0EB;color:#FF6934">⚠️ Robô ≤ Monitor</th>
+                </tr>
+              </thead>
+              <tbody id="edit-1505-body"></tbody>
             </table>
           </div>
 
@@ -965,6 +995,18 @@
         urbi_recanto: { monitor: 8, prenota: 4, robo: 8, total: 12 },
         urbi_samambaia: { monitor: 3, prenota: 19, robo: 2, total: 22 },
         maas: { monitor: 18, prenota: 21, robo: 11, total: 39 }
+      },
+      "1405": { // QUINTA
+        hp: { monitor: 21, prenota: 6, robo: 18, total: 27 },
+        urbi_recanto: { monitor: 20, prenota: 5, robo: 19, total: 25 },
+        urbi_samambaia: { monitor: 10, prenota: 14, robo: 8, total: 24 },
+        maas: { monitor: 15, prenota: 7, robo: 12, total: 22 }
+      },
+      "1505": { // SEXTA
+        hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
+        urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
+        urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
+        maas: { monitor: 0, prenota: 0, robo: 0, total: 0 }
       }
     };
 
@@ -976,7 +1018,7 @@
       var empresas = ['hp', 'urbi_recanto', 'urbi_samambaia', 'maas'];
       var sum = {};
       empresas.forEach(emp => { sum[emp] = { monitor: 0, prenota: 0, robo: 0, total: 0 }; });
-      ['1105', '1205', '1305'].forEach(d => {
+      ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
         empresas.forEach(emp => {
           sum[emp].monitor += dadosPorData[d][emp].monitor;
           sum[emp].prenota += dadosPorData[d][emp].prenota;
@@ -1002,7 +1044,7 @@
     }
 
     function getTotalGeralAcumulado() {
-      return getTotalData("1105") + getTotalData("1205") + getTotalData("1305");
+      return getTotalData("1105") + getTotalData("1205") + getTotalData("1305") + getTotalData("1405") + getTotalData("1505");
     }
 
     function getTotal(empresa) { return dados[empresa].total; }
@@ -1053,8 +1095,10 @@
       var total1105 = getValorDiaContexto("1105", paginaAtual);
       var total1205 = getValorDiaContexto("1205", paginaAtual);
       var total1305 = getValorDiaContexto("1305", paginaAtual);
-      var totalGeral = total1105 + total1205 + total1305;
-      var media = Math.round(totalGeral / 3);
+      var total1405 = getValorDiaContexto("1405", paginaAtual);
+      var total1505 = getValorDiaContexto("1505", paginaAtual);
+      var totalGeral = total1105 + total1205 + total1305 + total1405 + total1505;
+      var media = Math.round(totalGeral / 5);
 
       var html = `
         <div class="date-stat-card ${dataAtual === '1105' ? 'active-day' : ''}" onclick="changeData('1105')">
@@ -1066,18 +1110,30 @@
             <div class="date-stat-label">Terça-feira</div>
             <div class="date-stat-value">${total1205}</div>
             <div class="date-stat-total">notas (Terça)</div>
-            <div class="date-stat-diff ${total1205 >= total1105 ? 'positive' : 'negative'}">${total1205 >= total1105 ? '↑' : '↓'} ${Math.abs(total1205 - total1105)} vs Segunda</div>
+            <div class="date-stat-diff ${total1205 >= total1105 ? 'positive' : 'negative'}">${total1205 >= total1105 ? '↑' : '↓'} ${Math.abs(total1205 - total1105)} vs Seg</div>
         </div>
         <div class="date-stat-card ${dataAtual === '1305' ? 'active-day' : ''}" onclick="changeData('1305')">
             <div class="date-stat-label">Quarta-feira</div>
             <div class="date-stat-value">${total1305}</div>
             <div class="date-stat-total">notas (Quarta)</div>
-            <div class="date-stat-diff ${total1305 >= total1205 ? 'positive' : 'negative'}">${total1305 >= total1205 ? '↑' : '↓'} ${Math.abs(total1305 - total1205)} vs Terça</div>
+            <div class="date-stat-diff ${total1305 >= total1205 ? 'positive' : 'negative'}">${total1305 >= total1205 ? '↑' : '↓'} ${Math.abs(total1305 - total1205)} vs Ter</div>
+        </div>
+        <div class="date-stat-card ${dataAtual === '1405' ? 'active-day' : ''}" onclick="changeData('1405')">
+            <div class="date-stat-label">Quinta-feira</div>
+            <div class="date-stat-value">${total1405}</div>
+            <div class="date-stat-total">notas (Quinta)</div>
+            <div class="date-stat-diff ${total1405 >= total1305 ? 'positive' : 'negative'}">${total1405 >= total1305 ? '↑' : '↓'} ${Math.abs(total1405 - total1305)} vs Qua</div>
+        </div>
+        <div class="date-stat-card ${dataAtual === '1505' ? 'active-day' : ''}" onclick="changeData('1505')">
+            <div class="date-stat-label">Sexta-feira</div>
+            <div class="date-stat-value">${total1505}</div>
+            <div class="date-stat-total">notas (Sexta)</div>
+            <div class="date-stat-diff ${total1505 >= total1405 ? 'positive' : 'negative'}">${total1505 >= total1405 ? '↑' : '↓'} ${Math.abs(total1505 - total1405)} vs Qui</div>
         </div>
         <div class="date-stat-card ${dataAtual === 'acumulado' ? 'active-day' : ''}" onclick="changeData('acumulado')">
             <div class="date-stat-label">Total Acumulado</div>
             <div class="date-stat-value">${totalGeral}</div>
-            <div class="date-stat-total">notas (3 dias)</div>
+            <div class="date-stat-total">notas (5 dias)</div>
             <div class="date-stat-diff positive">média: ${media}/dia</div>
         </div>
     `;
@@ -1151,7 +1207,7 @@
       var totalGeral = getTotaisGeral().geral;
       var pctMaas = totalGeral > 0 ? ((getTotal('maas') / totalGeral) * 100).toFixed(1) : 0;
       var eficienciaRobo = getTotaisGeral().totalMonitor > 0 ? ((getTotaisGeral().totalRobo / getTotaisGeral().totalMonitor) * 100).toFixed(1) : 0;
-      var periodoStr = dataAtual === '1105' ? 'na Segunda-feira' : dataAtual === '1205' ? 'na Terça-feira' : dataAtual === '1305' ? 'na Quarta-feira' : 'no Total Acumulado';
+      var periodoStr = dataAtual === '1105' ? 'na Segunda-feira' : dataAtual === '1205' ? 'na Terça-feira' : dataAtual === '1305' ? 'na Quarta-feira' : dataAtual === '1405' ? 'na Quinta-feira' : dataAtual === '1505' ? 'na Sexta-feira' : 'no Total Acumulado';
       document.getElementById('insight-geral').innerHTML = `<strong>📊 Insight Operacional:</strong> Tivemos ${totalGeral} notas ${periodoStr}. MAAS lidera com ${getTotal('maas')} notas (${pctMaas}%). Eficiência do robô: ${eficienciaRobo}% do monitor escriturado.`;
     }
 
@@ -1220,7 +1276,7 @@
       var total = d.total;
       var pctRoboMonitor = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) : 0;
       var pctPrenota = total > 0 ? ((d.prenota / total) * 100).toFixed(1) : 0;
-      var periodoStr = dataAtual === '1105' ? 'na Segunda-feira' : dataAtual === '1205' ? 'na Terça-feira' : dataAtual === '1305' ? 'na Quarta-feira' : 'no Total Acumulado';
+      var periodoStr = dataAtual === '1105' ? 'na Segunda-feira' : dataAtual === '1205' ? 'na Terça-feira' : dataAtual === '1305' ? 'na Quarta-feira' : dataAtual === '1405' ? 'na Quinta-feira' : dataAtual === '1505' ? 'na Sexta-feira' : 'no Total Acumulado';
       var insights = {
         hp: `HP: ${total} notas ${periodoStr}. ${d.robo} de ${d.monitor} monitor escrituradas (${pctRoboMonitor}% de eficiência do robô).`,
         urbi_recanto: `URBI Recanto: ${total} notas ${periodoStr}. ${d.robo} de ${d.monitor} monitor escrituradas (${pctRoboMonitor}% de eficiência).`,
@@ -1233,7 +1289,7 @@
     // ========== EDIÇÃO ==========
     function atualizarTabelasEdicao() {
       var empresas = [{ nome: 'MAAS', key: 'maas' }, { nome: 'HP', key: 'hp' }, { nome: 'URBI Recanto', key: 'urbi_recanto' }, { nome: 'URBI Samambaia', key: 'urbi_samambaia' }];
-      ['1105', '1205', '1305'].forEach(data => {
+      ['1105', '1205', '1305', '1405', '1505'].forEach(data => {
         var tbody = document.getElementById(`edit-${data}-body`);
         if (tbody) {
           tbody.innerHTML = '';
@@ -1266,7 +1322,7 @@
 
     function applyEdits() {
       var empresas = ['maas', 'hp', 'urbi_recanto', 'urbi_samambaia'];
-      ['1105', '1205', '1305'].forEach(data => {
+      ['1105', '1205', '1305', '1405', '1505'].forEach(data => {
         empresas.forEach(emp => {
           var novoMonitor = parseInt(document.getElementById(`edit-${data}-${emp}-monitor`).value) || 0;
           var novoPrenota = parseInt(document.getElementById(`edit-${data}-${emp}-prenota`).value) || 0;
@@ -1290,7 +1346,9 @@
       dadosPorData = {
         "1105": { hp: { monitor: 16, prenota: 4, robo: 12, total: 20 }, urbi_recanto: { monitor: 11, prenota: 6, robo: 11, total: 17 }, urbi_samambaia: { monitor: 0, prenota: 13, robo: 0, total: 13 }, maas: { monitor: 11, prenota: 17, robo: 10, total: 28 } },
         "1205": { hp: { monitor: 21, prenota: 5, robo: 15, total: 26 }, urbi_recanto: { monitor: 1, prenota: 32, robo: 1, total: 33 }, urbi_samambaia: { monitor: 0, prenota: 16, robo: 0, total: 16 }, maas: { monitor: 16, prenota: 19, robo: 12, total: 35 } },
-        "1305": { hp: { monitor: 23, prenota: 17, robo: 19, total: 40 }, urbi_recanto: { monitor: 8, prenota: 4, robo: 8, total: 12 }, urbi_samambaia: { monitor: 3, prenota: 19, robo: 2, total: 22 }, maas: { monitor: 18, prenota: 21, robo: 11, total: 39 } }
+        "1305": { hp: { monitor: 23, prenota: 17, robo: 19, total: 40 }, urbi_recanto: { monitor: 8, prenota: 4, robo: 8, total: 12 }, urbi_samambaia: { monitor: 3, prenota: 19, robo: 2, total: 22 }, maas: { monitor: 18, prenota: 21, robo: 11, total: 39 } },
+        "1405": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+        "1505": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
       };
       dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
       localStorage.setItem('dashboardDados', JSON.stringify(dadosPorData));
@@ -1302,7 +1360,7 @@
     function changeData(data) {
       dataAtual = data;
       dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
-      var dataStr = data === '1105' ? 'Segunda-feira' : data === '1205' ? 'Terça-feira' : data === '1305' ? 'Quarta-feira' : 'Total Acumulado';
+      var dataStr = data === '1105' ? 'Segunda-feira' : data === '1205' ? 'Terça-feira' : data === '1305' ? 'Quarta-feira' : data === '1405' ? 'Quinta-feira' : data === '1505' ? 'Sexta-feira' : 'Total Acumulado';
       document.getElementById('page-sub').textContent = `Dashboard Corporativo - ${dataStr}`;
       atualizarDashboardCompleto();
       mostrarToast(`Visualizando ${dataStr}`);
@@ -1351,13 +1409,13 @@
         pdf.addImage(img, 'JPEG', 0, 0, w, h > 297 ? 297 : h);
       }
       showPage('geral', document.querySelector('.nav-item')); // Retorna suavemente
-      var dataStr = dataAtual === '1105' ? 'Segunda' : dataAtual === '1205' ? 'Terca' : dataAtual === '1305' ? 'Quarta' : 'Acumulado';
+      var dataStr = dataAtual === '1105' ? 'Segunda' : dataAtual === '1205' ? 'Terca' : dataAtual === '1305' ? 'Quarta' : dataAtual === '1405' ? 'Quinta' : dataAtual === '1505' ? 'Sexta' : 'Acumulado';
       pdf.save(`GCON_SIAN_BI_Notas_${dataStr}.pdf`);
       if (btn) { btn.textContent = '📄 Exportar PDF'; btn.disabled = false; }
     }
 
     function exportExcel() {
-      var dataStr = dataAtual === '1105' ? 'Segunda-feira' : dataAtual === '1205' ? 'Terça-feira' : dataAtual === '1305' ? 'Quarta-feira' : 'Total Acumulado';
+      var dataStr = dataAtual === '1105' ? 'Segunda-feira' : dataAtual === '1205' ? 'Terça-feira' : dataAtual === '1305' ? 'Quarta-feira' : dataAtual === '1405' ? 'Quinta-feira' : dataAtual === '1505' ? 'Sexta-feira' : 'Total Acumulado';
       var dadosExport = [['GCON SIAN - Dashboard de Notas Recebidas'], [`Visualização: ${dataStr}`], []];
       dadosExport.push(['Empresa', 'Monitor', 'Pré-nota', 'Robô', 'Total (Monitor+Pré-nota)', '% Robô/Monitor']);
       var empresas = ['maas', 'hp', 'urbi_recanto', 'urbi_samambaia'];
@@ -1372,7 +1430,9 @@
       dadosExport.push(['Segunda-feira', getValorDiaContexto('1105', paginaAtual)]);
       dadosExport.push(['Terça-feira', getValorDiaContexto('1205', paginaAtual)]);
       dadosExport.push(['Quarta-feira', getValorDiaContexto('1305', paginaAtual)]);
-      var totalAcumulado = getValorDiaContexto('1105', paginaAtual) + getValorDiaContexto('1205', paginaAtual) + getValorDiaContexto('1305', paginaAtual);
+      dadosExport.push(['Quinta-feira', getValorDiaContexto('1405', paginaAtual)]);
+      dadosExport.push(['Sexta-feira', getValorDiaContexto('1505', paginaAtual)]);
+      var totalAcumulado = getValorDiaContexto('1105', paginaAtual) + getValorDiaContexto('1205', paginaAtual) + getValorDiaContexto('1305', paginaAtual) + getValorDiaContexto('1405', paginaAtual) + getValorDiaContexto('1505', paginaAtual);
       dadosExport.push(['TOTAL ACUMULADO', totalAcumulado]);
       var ws = XLSX.utils.aoa_to_sheet(dadosExport);
       var wb = XLSX.utils.book_new();
@@ -1386,7 +1446,7 @@
     document.querySelectorAll('.edit-tab').forEach(tab => { tab.addEventListener('click', function () { document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.edit-data').forEach(d => d.classList.remove('active')); this.classList.add('active'); var data = this.getAttribute('data-data'); document.getElementById(`edit-${data}`).classList.add('active'); changeData(data); }); });
 
     var saved = localStorage.getItem('dashboardDados');
-    if (saved) { try { var parsed = JSON.parse(saved); dadosPorData["1105"] = parsed["1105"] || dadosPorData["1105"]; dadosPorData["1205"] = parsed["1205"] || dadosPorData["1205"]; dadosPorData["1305"] = parsed["1305"] || dadosPorData["1305"]; } catch (e) { } }
+    if (saved) { try { var parsed = JSON.parse(saved); dadosPorData["1105"] = parsed["1105"] || dadosPorData["1105"]; dadosPorData["1205"] = parsed["1205"] || dadosPorData["1205"]; dadosPorData["1305"] = parsed["1305"] || dadosPorData["1305"]; dadosPorData["1405"] = parsed["1405"] || dadosPorData["1405"]; dadosPorData["1505"] = parsed["1505"] || dadosPorData["1505"]; } catch (e) { } }
     dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
     atualizarTabelasEdicao();
     changeData(dataAtual);
