@@ -51,6 +51,35 @@
       flex-direction: column;
       min-height: 100vh;
       flex-shrink: 0;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    body.sidebar-collapsed .sidebar {
+      width: 70px;
+    }
+
+    body.sidebar-collapsed .sidebar-logo .logo-marca {
+      font-size: 12px;
+      text-align: center;
+    }
+
+    body.sidebar-collapsed .sidebar-logo p,
+    body.sidebar-collapsed .db-selector-container,
+    body.sidebar-collapsed .nav-label,
+    body.sidebar-collapsed .sidebar-footer {
+      display: none !important;
+    }
+
+    body.sidebar-collapsed .nav-item {
+      padding: 12px;
+      justify-content: center;
+      font-size: 0px;
+    }
+
+    body.sidebar-collapsed .nav-item .dot {
+      margin: 0;
     }
 
     .sidebar-logo {
@@ -109,7 +138,7 @@
     }
 
     .nav-item.active {
-      background: rgba(255, 105, 52, 0.2);
+      background: rgba(255, 255, 255, 0.12);
       color: #fff;
       border-left-color: var(--axia-laranja-eletrico);
       font-weight: 600;
@@ -128,6 +157,57 @@
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       font-size: 10px;
       color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ========== DB SELECTOR (PREMIUM CHANGER) ========== */
+    .db-selector-container {
+      padding: 16px 24px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .db-selector-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .db-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 4px;
+      gap: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .db-selector-btn {
+      text-align: center;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.65);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      background: transparent;
+      outline: none;
+    }
+
+    .db-selector-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .db-selector-btn.active {
+      background: var(--axia-laranja-eletrico);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(255, 105, 52, 0.3);
     }
 
     /* ========== MAIN ========== */
@@ -155,6 +235,26 @@
       font-weight: 700;
       color: var(--axia-azul-naval);
       letter-spacing: -0.3px;
+    }
+
+    .btn-toggle-sidebar {
+      background: none;
+      border: none;
+      color: var(--axia-azul-naval);
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .btn-toggle-sidebar:hover {
+      background: rgba(36, 40, 110, 0.08);
     }
 
     .topbar p {
@@ -370,8 +470,9 @@
     }
 
     .date-stat-card.active-day {
-      border: 2px solid var(--axia-laranja-eletrico);
-      background: linear-gradient(135deg, #FFF8F5 0%, #FFF 100%);
+      border: 2px solid var(--axia-azul-naval);
+      background: linear-gradient(135deg, #EEF0FA 0%, #FFF 100%);
+      box-shadow: 0 4px 12px rgba(36, 40, 110, 0.08);
     }
 
     .date-stat-label {
@@ -714,6 +815,18 @@
       <div class="logo-marca">GCON | <span>SIAN</span></div>
       <p>BI — Notas Recebidas</p>
     </div>
+
+    <!-- SELETOR DE DASHBOARD (4 SEMANAS PARAMETRIZADAS) -->
+    <div class="db-selector-container">
+      <div class="db-selector-label">Período Operacional</div>
+      <div class="db-selector">
+        <button id="db-btn-1" class="db-selector-btn active" onclick="switchDashboard(1)">Semana 1</button>
+        <button id="db-btn-2" class="db-selector-btn" onclick="switchDashboard(2)">Semana 2</button>
+        <button id="db-btn-3" class="db-selector-btn" onclick="switchDashboard(3)">Semana 3</button>
+        <button id="db-btn-4" class="db-selector-btn" onclick="switchDashboard(4)">Semana 4</button>
+      </div>
+    </div>
+
     <nav class="sidebar-nav">
       <div class="nav-label">Navegação</div>
       <div class="nav-item active" onclick="showPage('geral',this)">
@@ -737,110 +850,48 @@
 
   <div class="main">
     <div class="topbar">
-      <div>
-        <h1 id="page-title">Visão Geral</h1>
-        <p id="page-sub">Dashboard Corporativo</p>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="btn-toggle-sidebar" id="sidebarToggle" onclick="toggleSidebar()" title="Recolher Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" style="color: var(--axia-azul-naval);">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div>
+          <h1 id="page-title">Visão Geral</h1>
+          <p id="page-sub">Dashboard Corporativo</p>
+        </div>
       </div>
       <div class="btn-group">
-        <button class="btn-pdf btn-edit-toggle" onclick="toggleEditPanel()">✏️ Editar Dados</button>
-        <button class="btn-pdf btn-excel" onclick="exportExcel()">📊 Exportar Excel</button>
-        <button class="btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
+        <button class="btn-pdf btn-excel" onclick="exportExcel()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+            <line x1="15" y1="3" x2="15" y2="21"></line>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="3" y1="15" x2="21" y2="15"></line>
+          </svg>
+          Exportar Excel
+        </button>
+        <button class="btn-pdf" onclick="exportPDF()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Exportar PDF
+        </button>
       </div>
     </div>
 
     <div class="content">
-      <!-- PAINEL DE EDIÇÃO -->
-      <div class="edit-panel" id="editPanel">
-        <div class="edit-header" onclick="toggleEditPanel()">
-          <h4>✏️ PAINEL DE EDIÇÃO RÁPIDA</h4>
-          <span>▼</span>
-        </div>
-        <div class="edit-body" id="editBody">
-          <div class="edit-tabs">
-            <div class="edit-tab active" data-data="1105">Seg</div>
-            <div class="edit-tab" data-data="1205">Terça-feira</div>
-            <div class="edit-tab" data-data="1305">Quarta-feira</div>
-            <div class="edit-tab" data-data="1405">Quinta-feira</div>
-            <div class="edit-tab" data-data="1505">Sexta-feira</div>
-          </div>
-
-          <div id="edit-1105" class="edit-data active">
-            <table class="edit-table">
-              <thead>
-                <tr>
-                  <th>Empresa</th>
-                  <th>Monitor</th>
-                  <th>Pré-nota</th>
-                  <th>Robô</th>
-                  <th style="background:#FFF0EB;color:#FF6934">⚠️ Robô ≤ Monitor</th>
-                </tr>
-              </thead>
-              <tbody id="edit-1105-body"></tbody>
-            </table>
-          </div>
-          <div id="edit-1205" class="edit-data">
-            <table class="edit-table">
-              <thead>
-                <tr>
-                  <th>Empresa</th>
-                  <th>Monitor</th>
-                  <th>Pré-nota</th>
-                  <th>Robô</th>
-                  <th style="background:#FFF0EB;color:#FF6934">⚠️ Robô ≤ Monitor</th>
-                </tr>
-              </thead>
-              <tbody id="edit-1205-body"></tbody>
-            </table>
-          </div>
-          <div id="edit-1305" class="edit-data">
-            <table class="edit-table">
-              <thead>
-                <tr>
-                  <th>Empresa</th>
-                  <th>Monitor</th>
-                  <th>Pré-nota</th>
-                  <th>Robô</th>
-                  <th style="background:#FFF0EB;color:#FF6934">⚠️ Robô ≤ Monitor</th>
-                </tr>
-              </thead>
-              <tbody id="edit-1305-body"></tbody>
-            </table>
-          </div>
-          <div id="edit-1405" class="edit-data">
-            <table class="edit-table">
-              <thead>
-                <tr>
-                  <th>Empresa</th>
-                  <th>Monitor</th>
-                  <th>Pré-nota</th>
-                  <th>Robô</th>
-                  <th style="background:#FFF0EB;color:#FF6934">⚠️ Robô ≤ Monitor</th>
-                </tr>
-              </thead>
-              <tbody id="edit-1405-body"></tbody>
-            </table>
-          </div>
-          <div id="edit-1505" class="edit-data">
-            <table class="edit-table">
-              <thead>
-                <tr>
-                  <th>Empresa</th>
-                  <th>Monitor</th>
-                  <th>Pré-nota</th>
-                  <th>Robô</th>
-                  <th style="background:#FFF0EB;color:#FF6934">⚠️ Robô ≤ Monitor</th>
-                </tr>
-              </thead>
-              <tbody id="edit-1505-body"></tbody>
-            </table>
-          </div>
-
-          <div class="edit-actions">
-            <button class="btn-apply" onclick="applyEdits()">✅ Aplicar e Atualizar</button>
-            <button class="btn-apply" style="background:#94958B;" onclick="resetData()">⟳ Resetar Padrão</button>
-          </div>
-        </div>
-      </div>
+      <!-- O painel de edição rápida foi removido a pedido do usuário -->
 
       <!-- DATE STATS CARDS - TOTAIS DOS DIAS -->
       <div class="date-stats-cards" id="date-stats-cards"></div>
@@ -974,42 +1025,50 @@
   <div id="toast" class="toast">✅ Operação concluída!</div>
 
   <script>
-    // ========== DADOS REAIS CONFORME TABELA FORNECIDA ==========
-    // REGRA: Robô é SUB do Monitor (Robô ≤ Monitor)
-    // TOTAL = Monitor + Pré-nota (Robô NÃO entra na soma total)
-    var dadosPorData = {
-      "1105": { // 11/05/2026 - SEGUNDA: 78 notas
-        hp: { monitor: 16, prenota: 4, robo: 12, total: 20 },
-        urbi_recanto: { monitor: 11, prenota: 6, robo: 11, total: 17 },
-        urbi_samambaia: { monitor: 0, prenota: 13, robo: 0, total: 13 },
-        maas: { monitor: 11, prenota: 17, robo: 10, total: 28 }
-      },
-      "1205": { // 12/05/2026 - TERÇA: 110 notas
-        hp: { monitor: 21, prenota: 5, robo: 15, total: 26 },
-        urbi_recanto: { monitor: 1, prenota: 32, robo: 1, total: 33 },
-        urbi_samambaia: { monitor: 0, prenota: 16, robo: 0, total: 16 },
-        maas: { monitor: 16, prenota: 19, robo: 12, total: 35 }
-      },
-      "1305": { // 13/05/2026 - QUARTA: 113 notas
-        hp: { monitor: 23, prenota: 17, robo: 19, total: 40 },
-        urbi_recanto: { monitor: 8, prenota: 4, robo: 8, total: 12 },
-        urbi_samambaia: { monitor: 3, prenota: 19, robo: 2, total: 22 },
-        maas: { monitor: 18, prenota: 21, robo: 11, total: 39 }
-      },
-      "1405": { // QUINTA
-        hp: { monitor: 21, prenota: 6, robo: 18, total: 27 },
-        urbi_recanto: { monitor: 20, prenota: 5, robo: 19, total: 25 },
-        urbi_samambaia: { monitor: 10, prenota: 14, robo: 8, total: 24 },
-        maas: { monitor: 15, prenota: 7, robo: 12, total: 22 }
-      },
-      "1505": { // SEXTA
-        hp: { monitor: 33, prenota: 10, robo: 26, total: 43 },
-        urbi_recanto: { monitor: 4, prenota: 4, robo: 3, total: 8 },
-        urbi_samambaia: { monitor: 8, prenota: 5, robo: 6, total: 13 },
-        maas: { monitor: 22, prenota: 7, robo: 18, total: 29 }
-      }
+    // ========== CONTROLE DE ESTADOS DE DASHBOARDS DE SEMANAS ==========
+    // SEMANA 1 (VALORES PADRÃO OPERACIONAIS)
+    var defaultDadosSemana1 = {
+      "1105": { hp: { monitor: 16, prenota: 4, robo: 12, total: 20 }, urbi_recanto: { monitor: 11, prenota: 6, robo: 11, total: 17 }, urbi_samambaia: { monitor: 0, prenota: 13, robo: 0, total: 13 }, maas: { monitor: 11, prenota: 17, robo: 10, total: 28 } },
+      "1205": { hp: { monitor: 21, prenota: 5, robo: 15, total: 26 }, urbi_recanto: { monitor: 1, prenota: 32, robo: 1, total: 33 }, urbi_samambaia: { monitor: 0, prenota: 16, robo: 0, total: 16 }, maas: { monitor: 16, prenota: 19, robo: 12, total: 35 } },
+      "1305": { hp: { monitor: 23, prenota: 17, robo: 19, total: 40 }, urbi_recanto: { monitor: 8, prenota: 4, robo: 8, total: 12 }, urbi_samambaia: { monitor: 3, prenota: 19, robo: 2, total: 22 }, maas: { monitor: 18, prenota: 21, robo: 11, total: 39 } },
+      "1405": { hp: { monitor: 21, prenota: 6, robo: 18, total: 27 }, urbi_recanto: { monitor: 20, prenota: 5, robo: 19, total: 25 }, urbi_samambaia: { monitor: 10, prenota: 14, robo: 8, total: 24 }, maas: { monitor: 15, prenota: 7, robo: 12, total: 22 } },
+      "1505": { hp: { monitor: 33, prenota: 10, robo: 26, total: 43 }, urbi_recanto: { monitor: 4, prenota: 4, robo: 3, total: 8 }, urbi_samambaia: { monitor: 8, prenota: 5, robo: 6, total: 13 }, maas: { monitor: 22, prenota: 7, robo: 18, total: 29 } }
     };
 
+    // SEMANA 2 (DIGITE OS DADOS DA SEMANA 2 AQUI)
+    var defaultDadosSemana2 = {
+      "1105": { hp: { monitor: 13, prenota: 21, robo: 7, total: 34 }, urbi_recanto: { monitor: 8, prenota: 10, robo: 7, total: 18 }, urbi_samambaia: { monitor: 4, prenota: 21, robo: 4, total: 25 }, maas: { monitor: 13, prenota: 17, robo: 9, total: 30 } },
+      "1205": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1305": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1405": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1505": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
+    };
+
+    // SEMANA 3 (DIGITE OS DADOS DA SEMANA 3 AQUI)
+    var defaultDadosSemana3 = {
+      "1105": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1205": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1305": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1405": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1505": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
+    };
+
+    // SEMANA 4 (DIGITE OS DADOS DA SEMANA 4 AQUI)
+    var defaultDadosSemana4 = {
+      "1105": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1205": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1305": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1405": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1505": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
+    };
+
+    var activeDashboard = 1;
+    var dadosSemana1 = JSON.parse(JSON.stringify(defaultDadosSemana1));
+    var dadosSemana2 = JSON.parse(JSON.stringify(defaultDadosSemana2));
+    var dadosSemana3 = JSON.parse(JSON.stringify(defaultDadosSemana3));
+    var dadosSemana4 = JSON.parse(JSON.stringify(defaultDadosSemana4));
+
+    var dadosPorData = dadosSemana1;
     var dataAtual = "1105";
     var paginaAtual = "geral";
     var dados = dadosPorData["1105"];
@@ -1160,7 +1219,8 @@
       var prenota = [dados.maas.prenota, dados.hp.prenota, dados.urbi_recanto.prenota, dados.urbi_samambaia.prenota];
       var robo = [dados.maas.robo, dados.hp.robo, dados.urbi_recanto.robo, dados.urbi_samambaia.robo];
 
-      Plotly.newPlot('g_bar', [{ x: empresas, y: totais, type: 'bar', marker: { color: ['#FF6934', '#24286E', '#2E7D32', '#94958B'] }, text: totais, textposition: 'outside' }], { margin: { t: 10, l: 40, r: 10, b: 60 }, yaxis: { title: 'Quantidade', color: '#6B6B6B' }, showlegend: false, font: { family: 'Inter', size: 12 } }, { displayModeBar: false });
+      var maxTotal = Math.max(...totais);
+      Plotly.newPlot('g_bar', [{ x: empresas, y: totais, type: 'bar', marker: { color: ['#FF6934', '#24286E', '#2E7D32', '#94958B'] }, text: totais, textposition: 'outside' }], { margin: { t: 30, l: 40, r: 10, b: 60 }, yaxis: { title: 'Quantidade', color: '#6B6B6B', range: [0, maxTotal * 1.15 || 10] }, showlegend: false, font: { family: 'Inter', size: 12 } }, { displayModeBar: false });
 
       var roboEscriturado = robo[0] + robo[1] + robo[2] + robo[3];
       var monitorNaoEscriturado = monitor[0] + monitor[1] + monitor[2] + monitor[3] - roboEscriturado;
@@ -1205,10 +1265,38 @@
 
     function atualizarInsightGeral() {
       var totalGeral = getTotaisGeral().geral;
-      var pctMaas = totalGeral > 0 ? ((getTotal('maas') / totalGeral) * 100).toFixed(1) : 0;
-      var eficienciaRobo = getTotaisGeral().totalMonitor > 0 ? ((getTotaisGeral().totalRobo / getTotaisGeral().totalMonitor) * 100).toFixed(1) : 0;
       var periodoStr = dataAtual === '1105' ? 'na Segunda-feira' : dataAtual === '1205' ? 'na Terça-feira' : dataAtual === '1305' ? 'na Quarta-feira' : dataAtual === '1405' ? 'na Quinta-feira' : dataAtual === '1505' ? 'na Sexta-feira' : 'no Total Acumulado';
-      document.getElementById('insight-geral').innerHTML = `<strong>📊 Insight Operacional:</strong> Tivemos ${totalGeral} notas ${periodoStr}. MAAS lidera com ${getTotal('maas')} notas (${pctMaas}%). Eficiência do robô: ${eficienciaRobo}% do monitor escriturado.`;
+
+      if (totalGeral === 0) {
+        document.getElementById('insight-geral').innerHTML = `<strong>📊 Insight Operacional:</strong> Nenhuma nota fiscal foi recebida ${periodoStr} até o momento.`;
+        return;
+      }
+
+      var empresas = [
+        { nome: 'MAAS', total: getTotal('maas') },
+        { nome: 'HP', total: getTotal('hp') },
+        { nome: 'URBI Recanto', total: getTotal('urbi_recanto') },
+        { nome: 'URBI Samambaia', total: getTotal('urbi_samambaia') }
+      ];
+
+      // Encontra a empresa com maior total
+      var lider = empresas.reduce((max, emp) => emp.total > max.total ? emp : max, empresas[0]);
+      var pctLider = ((lider.total / totalGeral) * 100).toFixed(1);
+
+      var eficienciaRobo = getTotaisGeral().totalMonitor > 0 ? ((getTotaisGeral().totalRobo / getTotaisGeral().totalMonitor) * 100).toFixed(1) : 0;
+
+      var insightStr = `<strong>📊 Insight Operacional:</strong> Tivemos um total de ${totalGeral} notas ${periodoStr}. `;
+      if (lider.total > 0) {
+        insightStr += `A empresa <strong>${lider.nome}</strong> apresenta o maior volume com ${lider.total} notas (${pctLider}% do total). `;
+      }
+
+      if (getTotaisGeral().totalMonitor > 0) {
+        insightStr += `A eficiência do robô na escrituração das notas do Monitor é de <strong>${eficienciaRobo}%</strong> (${getTotaisGeral().totalRobo} de ${getTotaisGeral().totalMonitor}).`;
+      } else {
+        insightStr += `Nenhuma nota foi recebida via Monitor para processamento do robô.`;
+      }
+
+      document.getElementById('insight-geral').innerHTML = insightStr;
     }
 
     function atualizarCardsEmpresa(emp, containerId, nome) {
@@ -1227,7 +1315,8 @@
 
     function atualizarGraficosEmpresa(emp, barId, pieId) {
       var d = dados[emp];
-      Plotly.newPlot(barId, [{ x: ['Monitor', 'Pré-nota', 'Robô'], y: [d.monitor, d.prenota, d.robo], type: 'bar', marker: { color: ['#2E7D32', '#ED6C02', '#FF6934'] }, text: [d.monitor, d.prenota, d.robo], textposition: 'outside' }], { margin: { t: 10, l: 40, r: 10, b: 60 }, yaxis: { title: 'Quantidade' }, showlegend: false, font: { family: 'Inter' } }, { displayModeBar: false });
+      var maxVal = Math.max(d.monitor, d.prenota, d.robo);
+      Plotly.newPlot(barId, [{ x: ['Monitor', 'Pré-nota', 'Robô'], y: [d.monitor, d.prenota, d.robo], type: 'bar', marker: { color: ['#2E7D32', '#ED6C02', '#FF6934'] }, text: [d.monitor, d.prenota, d.robo], textposition: 'outside' }], { margin: { t: 30, l: 40, r: 10, b: 60 }, yaxis: { title: 'Quantidade', range: [0, maxVal * 1.15 || 10] }, showlegend: false, font: { family: 'Inter' } }, { displayModeBar: false });
 
       var naoEscriturado = d.monitor - d.robo;
       var labels = [], values = [], colors = [];
@@ -1277,17 +1366,28 @@
       var pctRoboMonitor = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) : 0;
       var pctPrenota = total > 0 ? ((d.prenota / total) * 100).toFixed(1) : 0;
       var periodoStr = dataAtual === '1105' ? 'na Segunda-feira' : dataAtual === '1205' ? 'na Terça-feira' : dataAtual === '1305' ? 'na Quarta-feira' : dataAtual === '1405' ? 'na Quinta-feira' : dataAtual === '1505' ? 'na Sexta-feira' : 'no Total Acumulado';
-      var insights = {
-        hp: `HP: ${total} notas ${periodoStr}. ${d.robo} de ${d.monitor} monitor escrituradas (${pctRoboMonitor}% de eficiência do robô).`,
-        urbi_recanto: `URBI Recanto: ${total} notas ${periodoStr}. ${d.robo} de ${d.monitor} monitor escrituradas (${pctRoboMonitor}% de eficiência).`,
-        urbi_samambaia: `URBI Samambaia: ${total} notas ${periodoStr}, ${d.prenota} via Pré-nota (${pctPrenota}%). Robô: ${pctRoboMonitor}% do monitor.`,
-        maas: `MAAS: ${total} notas ${periodoStr}, ${d.prenota} via Pré-nota (${pctPrenota}%). Robô escriturou ${d.robo} de ${d.monitor} monitor (${pctRoboMonitor}%).`
-      };
-      document.getElementById(containerId).innerHTML = `<strong>📊 Insight ${nome}:</strong> ${insights[emp]}`;
+
+      if (total === 0) {
+        document.getElementById(containerId).innerHTML = `<strong>📊 Insight ${nome}:</strong> Nenhuma movimentação registrada de notas ${periodoStr}.`;
+        return;
+      }
+
+      var insightText = `<strong>${nome}</strong> registrou um volume de ${total} notas ${periodoStr}. `;
+
+      if (d.monitor > 0) {
+        insightText += `O robô escriturou com sucesso ${d.robo} das ${d.monitor} notas recebidas pelo Monitor (eficiência de <strong>${pctRoboMonitor}%</strong>). `;
+      }
+
+      if (d.prenota > 0) {
+        insightText += `Foram recebidas ${d.prenota} notas via Pré-nota (${pctPrenota}% da volumetria).`;
+      }
+
+      document.getElementById(containerId).innerHTML = `<strong>📊 Insight ${nome}:</strong> ${insightText}`;
     }
 
     // ========== EDIÇÃO ==========
     function atualizarTabelasEdicao() {
+      if (!document.getElementById('edit-1105-body')) return;
       var empresas = [{ nome: 'MAAS', key: 'maas' }, { nome: 'HP', key: 'hp' }, { nome: 'URBI Recanto', key: 'urbi_recanto' }, { nome: 'URBI Samambaia', key: 'urbi_samambaia' }];
       ['1105', '1205', '1305', '1405', '1505'].forEach(data => {
         var tbody = document.getElementById(`edit-${data}-body`);
@@ -1337,21 +1437,27 @@
         });
       });
       dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
-      localStorage.setItem('dashboardDados', JSON.stringify(dadosPorData));
+      localStorage.setItem(`dashboardSemana${activeDashboard}`, JSON.stringify(dadosPorData));
       atualizarDashboardCompleto();
       mostrarToast('Dados atualizados e salvos!');
     }
 
     function resetData() {
-      dadosPorData = {
-        "1105": { hp: { monitor: 16, prenota: 4, robo: 12, total: 20 }, urbi_recanto: { monitor: 11, prenota: 6, robo: 11, total: 17 }, urbi_samambaia: { monitor: 0, prenota: 13, robo: 0, total: 13 }, maas: { monitor: 11, prenota: 17, robo: 10, total: 28 } },
-        "1205": { hp: { monitor: 21, prenota: 5, robo: 15, total: 26 }, urbi_recanto: { monitor: 1, prenota: 32, robo: 1, total: 33 }, urbi_samambaia: { monitor: 0, prenota: 16, robo: 0, total: 16 }, maas: { monitor: 16, prenota: 19, robo: 12, total: 35 } },
-        "1305": { hp: { monitor: 23, prenota: 17, robo: 19, total: 40 }, urbi_recanto: { monitor: 8, prenota: 4, robo: 8, total: 12 }, urbi_samambaia: { monitor: 3, prenota: 19, robo: 2, total: 22 }, maas: { monitor: 18, prenota: 21, robo: 11, total: 39 } },
-        "1405": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
-        "1505": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
-      };
+      if (activeDashboard === 1) {
+        dadosSemana1 = JSON.parse(JSON.stringify(defaultDadosSemana1));
+        dadosPorData = dadosSemana1;
+      } else if (activeDashboard === 2) {
+        dadosSemana2 = JSON.parse(JSON.stringify(defaultDadosSemana2));
+        dadosPorData = dadosSemana2;
+      } else if (activeDashboard === 3) {
+        dadosSemana3 = JSON.parse(JSON.stringify(defaultDadosSemana3));
+        dadosPorData = dadosSemana3;
+      } else if (activeDashboard === 4) {
+        dadosSemana4 = JSON.parse(JSON.stringify(defaultDadosSemana4));
+        dadosPorData = dadosSemana4;
+      }
+      localStorage.setItem(`dashboardSemana${activeDashboard}`, JSON.stringify(dadosPorData));
       dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
-      localStorage.setItem('dashboardDados', JSON.stringify(dadosPorData));
       atualizarTabelasEdicao();
       atualizarDashboardCompleto();
       mostrarToast('Dados resetados para o padrão!');
@@ -1361,7 +1467,7 @@
       dataAtual = data;
       dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
       var dataStr = data === '1105' ? 'Segunda-feira' : data === '1205' ? 'Terça-feira' : data === '1305' ? 'Quarta-feira' : data === '1405' ? 'Quinta-feira' : data === '1505' ? 'Sexta-feira' : 'Total Acumulado';
-      document.getElementById('page-sub').textContent = `Dashboard Corporativo - ${dataStr}`;
+      document.getElementById('page-sub').textContent = `Semana ${activeDashboard} - Dashboard Corporativo - ${dataStr}`;
       atualizarDashboardCompleto();
       mostrarToast(`Visualizando ${dataStr}`);
     }
@@ -1385,8 +1491,43 @@
       document.getElementById(id).classList.add('active');
       if (el) el.classList.add('active');
       var titles = { geral: 'Visão Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
-      document.getElementById('page-title').textContent = titles[id];
+      document.getElementById('page-title').textContent = `Semana ${activeDashboard} - ${titles[id]}`;
       atualizarDateStatsCards();
+    }
+
+    function switchDashboard(dbNumber) {
+      activeDashboard = dbNumber;
+
+      // Alterna ponteiro de dados
+      if (activeDashboard === 1) {
+        dadosPorData = dadosSemana1;
+      } else if (activeDashboard === 2) {
+        dadosPorData = dadosSemana2;
+      } else if (activeDashboard === 3) {
+        dadosPorData = dadosSemana3;
+      } else if (activeDashboard === 4) {
+        dadosPorData = dadosSemana4;
+      }
+      dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
+
+      // Atualiza botões do seletor
+      document.querySelectorAll('.db-selector-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`db-btn-${dbNumber}`).classList.add('active');
+
+      // Atualiza títulos e legendas
+      var titles = { geral: 'Visão Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
+      document.getElementById('page-title').textContent = `Semana ${activeDashboard} - ${titles[paginaAtual]}`;
+
+      var dataStr = dataAtual === '1105' ? 'Segunda-feira' : dataAtual === '1205' ? 'Terça-feira' : dataAtual === '1305' ? 'Quarta-feira' : dataAtual === '1405' ? 'Quinta-feira' : dataAtual === '1505' ? 'Sexta-feira' : 'Total Acumulado';
+      document.getElementById('page-sub').textContent = `Semana ${activeDashboard} - Dashboard Corporativo - ${dataStr}`;
+
+      // Atualiza inputs de edição e redesenha a interface
+      atualizarTabelasEdicao();
+      atualizarDashboardCompleto();
+
+      mostrarToast(`Alternado para Semana ${activeDashboard}`);
     }
 
     async function exportPDF() {
@@ -1399,7 +1540,7 @@
       for (var i = 0; i < pageIds.length; i++) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageIds[i]).classList.add('active');
-        document.getElementById('page-title').textContent = titles[i];
+        document.getElementById('page-title').textContent = `Semana ${activeDashboard} - ${titles[i]}`;
         await new Promise(r => setTimeout(r, 300));
         var el = document.querySelector('.content');
         var canvas = await html2canvas(el, { scale: 1.5, useCORS: true, backgroundColor: '#F5F5F5' });
@@ -1410,13 +1551,13 @@
       }
       showPage('geral', document.querySelector('.nav-item')); // Retorna suavemente
       var dataStr = dataAtual === '1105' ? 'Segunda' : dataAtual === '1205' ? 'Terca' : dataAtual === '1305' ? 'Quarta' : dataAtual === '1405' ? 'Quinta' : dataAtual === '1505' ? 'Sexta' : 'Acumulado';
-      pdf.save(`GCON_SIAN_BI_Notas_${dataStr}.pdf`);
+      pdf.save(`GCON_SIAN_BI_Notas_Semana_${activeDashboard}_${dataStr}.pdf`);
       if (btn) { btn.textContent = '📄 Exportar PDF'; btn.disabled = false; }
     }
 
     function exportExcel() {
       var dataStr = dataAtual === '1105' ? 'Segunda-feira' : dataAtual === '1205' ? 'Terça-feira' : dataAtual === '1305' ? 'Quarta-feira' : dataAtual === '1405' ? 'Quinta-feira' : dataAtual === '1505' ? 'Sexta-feira' : 'Total Acumulado';
-      var dadosExport = [['GCON SIAN - Dashboard de Notas Recebidas'], [`Visualização: ${dataStr}`], []];
+      var dadosExport = [[`GCON SIAN - Dashboard de Notas Recebidas - Semana ${activeDashboard}`], [`Visualização: ${dataStr}`], []];
       dadosExport.push(['Empresa', 'Monitor', 'Pré-nota', 'Robô', 'Total (Monitor+Pré-nota)', '% Robô/Monitor']);
       var empresas = ['maas', 'hp', 'urbi_recanto', 'urbi_samambaia'];
       var nomes = ['MAAS', 'HP', 'URBI Recanto', 'URBI Samambaia'];
@@ -1437,7 +1578,7 @@
       var ws = XLSX.utils.aoa_to_sheet(dadosExport);
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, `GCON_SIAN`);
-      XLSX.writeFile(wb, `GCON_SIAN_BI_Notas.xlsx`);
+      XLSX.writeFile(wb, `GCON_SIAN_BI_Notas_Semana_${activeDashboard}.xlsx`);
       mostrarToast('Excel exportado!');
     }
 
@@ -1445,8 +1586,62 @@
 
     document.querySelectorAll('.edit-tab').forEach(tab => { tab.addEventListener('click', function () { document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.edit-data').forEach(d => d.classList.remove('active')); this.classList.add('active'); var data = this.getAttribute('data-data'); document.getElementById(`edit-${data}`).classList.add('active'); changeData(data); }); });
 
-    var saved = localStorage.getItem('dashboardDados');
-    if (saved) { try { var parsed = JSON.parse(saved); dadosPorData["1105"] = parsed["1105"] || dadosPorData["1105"]; dadosPorData["1205"] = parsed["1205"] || dadosPorData["1205"]; dadosPorData["1305"] = parsed["1305"] || dadosPorData["1305"]; dadosPorData["1405"] = parsed["1405"] || dadosPorData["1405"]; dadosPorData["1505"] = parsed["1505"] || dadosPorData["1505"]; } catch (e) { } }
+    function toggleSidebar() {
+      document.body.classList.toggle('sidebar-collapsed');
+      var collapsed = document.body.classList.contains('sidebar-collapsed');
+      localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
+      setTimeout(function () {
+        window.dispatchEvent(new Event('resize'));
+      }, 310);
+    }
+
+    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+      document.body.classList.add('sidebar-collapsed');
+    }
+
+    // Carrega dados persistidos do LocalStorage para as 4 semanas
+    var saved1 = localStorage.getItem('dashboardSemana1');
+    if (saved1) {
+      try {
+        var parsed1 = JSON.parse(saved1);
+        ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
+          if (parsed1[d]) dadosSemana1[d] = parsed1[d];
+        });
+      } catch (e) { }
+    }
+
+    var saved2 = localStorage.getItem('dashboardSemana2');
+    if (saved2) {
+      try {
+        var parsed2 = JSON.parse(saved2);
+        ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
+          if (parsed2[d]) dadosSemana2[d] = parsed2[d];
+        });
+      } catch (e) { }
+    }
+
+    var saved3 = localStorage.getItem('dashboardSemana3');
+    if (saved3) {
+      try {
+        var parsed3 = JSON.parse(saved3);
+        ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
+          if (parsed3[d]) dadosSemana3[d] = parsed3[d];
+        });
+      } catch (e) { }
+    }
+
+    var saved4 = localStorage.getItem('dashboardSemana4');
+    if (saved4) {
+      try {
+        var parsed4 = JSON.parse(saved4);
+        ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
+          if (parsed4[d]) dadosSemana4[d] = parsed4[d];
+        });
+      } catch (e) { }
+    }
+
+    // Inicializa ponteiros de estado ativos para a semana corrente
+    dadosPorData = dadosSemana1;
     dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
     atualizarTabelasEdicao();
     changeData(dataAtual);
