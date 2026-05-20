@@ -825,6 +825,9 @@
         <button id="db-btn-3" class="db-selector-btn" onclick="switchDashboard(3)">Semana 3</button>
         <button id="db-btn-4" class="db-selector-btn" onclick="switchDashboard(4)">Semana 4</button>
       </div>
+      <div class="db-selector-date" id="db-active-range"
+        style="font-size: 10px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 6px; font-weight: 500; letter-spacing: 0.3px;">
+        📅 Período: 11/05 a 15/05</div>
     </div>
 
     <nav class="sidebar-nav">
@@ -1025,6 +1028,15 @@
   <div id="toast" class="toast">✅ Operação concluída!</div>
 
   <script>
+    // ========== CONFIGURAÇÃO DE DATAS E CALENDÁRIO DAS SEMANAS ==========
+    // DIGITE E ALTERE AS DATAS DE EXIBIÇÃO DE CADA DIA E SEMANA AQUI
+    var configCalendario = {
+      1: { inicio: "11/05", fim: "15/05", dias: { "1105": "11/05", "1205": "12/05", "1305": "13/05", "1405": "14/05", "1505": "15/05" } },
+      2: { inicio: "18/05", fim: "22/05", dias: { "1105": "18/05", "1205": "19/05", "1305": "20/05", "1405": "21/05", "1505": "22/05" } },
+      3: { inicio: "25/05", fim: "29/05", dias: { "1105": "25/05", "1205": "26/05", "1305": "27/05", "1405": "28/05", "1505": "29/05" } },
+      4: { inicio: "01/06", fim: "05/06", dias: { "1105": "01/06", "1205": "02/06", "1305": "03/06", "1405": "04/06", "1505": "05/06" } }
+    };
+
     // ========== CONTROLE DE ESTADOS DE DASHBOARDS DE SEMANAS ==========
     // SEMANA 1 (VALORES PADRÃO OPERACIONAIS)
     var defaultDadosSemana1 = {
@@ -1038,7 +1050,7 @@
     // SEMANA 2 (DIGITE OS DADOS DA SEMANA 2 AQUI)
     var defaultDadosSemana2 = {
       "1105": { hp: { monitor: 13, prenota: 21, robo: 7, total: 34 }, urbi_recanto: { monitor: 8, prenota: 10, robo: 7, total: 18 }, urbi_samambaia: { monitor: 4, prenota: 21, robo: 4, total: 25 }, maas: { monitor: 13, prenota: 17, robo: 9, total: 30 } },
-      "1205": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
+      "1205": { hp: { monitor: 0, prenota: 23, robo: 0, total: 23 }, urbi_recanto: { monitor: 2, prenota: 12, robo: 2, total: 14 }, urbi_samambaia: { monitor: 0, prenota: 18, robo: 0, total: 18 }, maas: { monitor: 6, prenota: 18, robo: 4, total: 24 } },
       "1305": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
       "1405": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
       "1505": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
@@ -1159,34 +1171,36 @@
       var totalGeral = total1105 + total1205 + total1305 + total1405 + total1505;
       var media = Math.round(totalGeral / 5);
 
+      var dias = configCalendario[activeDashboard].dias;
+
       var html = `
         <div class="date-stat-card ${dataAtual === '1105' ? 'active-day' : ''}" onclick="changeData('1105')">
             <div class="date-stat-label">Segunda-feira</div>
             <div class="date-stat-value">${total1105}</div>
-            <div class="date-stat-total">notas (Segunda)</div>
+            <div class="date-stat-total">notas (${dias["1105"]})</div>
         </div>
         <div class="date-stat-card ${dataAtual === '1205' ? 'active-day' : ''}" onclick="changeData('1205')">
             <div class="date-stat-label">Terça-feira</div>
             <div class="date-stat-value">${total1205}</div>
-            <div class="date-stat-total">notas (Terça)</div>
+            <div class="date-stat-total">notas (${dias["1205"]})</div>
             <div class="date-stat-diff ${total1205 >= total1105 ? 'positive' : 'negative'}">${total1205 >= total1105 ? '↑' : '↓'} ${Math.abs(total1205 - total1105)} vs Seg</div>
         </div>
         <div class="date-stat-card ${dataAtual === '1305' ? 'active-day' : ''}" onclick="changeData('1305')">
             <div class="date-stat-label">Quarta-feira</div>
             <div class="date-stat-value">${total1305}</div>
-            <div class="date-stat-total">notas (Quarta)</div>
+            <div class="date-stat-total">notas (${dias["1305"]})</div>
             <div class="date-stat-diff ${total1305 >= total1205 ? 'positive' : 'negative'}">${total1305 >= total1205 ? '↑' : '↓'} ${Math.abs(total1305 - total1205)} vs Ter</div>
         </div>
         <div class="date-stat-card ${dataAtual === '1405' ? 'active-day' : ''}" onclick="changeData('1405')">
             <div class="date-stat-label">Quinta-feira</div>
             <div class="date-stat-value">${total1405}</div>
-            <div class="date-stat-total">notas (Quinta)</div>
+            <div class="date-stat-total">notas (${dias["1405"]})</div>
             <div class="date-stat-diff ${total1405 >= total1305 ? 'positive' : 'negative'}">${total1405 >= total1305 ? '↑' : '↓'} ${Math.abs(total1405 - total1305)} vs Qua</div>
         </div>
         <div class="date-stat-card ${dataAtual === '1505' ? 'active-day' : ''}" onclick="changeData('1505')">
             <div class="date-stat-label">Sexta-feira</div>
             <div class="date-stat-value">${total1505}</div>
-            <div class="date-stat-total">notas (Sexta)</div>
+            <div class="date-stat-total">notas (${dias["1505"]})</div>
             <div class="date-stat-diff ${total1505 >= total1405 ? 'positive' : 'negative'}">${total1505 >= total1405 ? '↑' : '↓'} ${Math.abs(total1505 - total1405)} vs Qui</div>
         </div>
         <div class="date-stat-card ${dataAtual === 'acumulado' ? 'active-day' : ''}" onclick="changeData('acumulado')">
@@ -1195,7 +1209,7 @@
             <div class="date-stat-total">notas (5 dias)</div>
             <div class="date-stat-diff positive">média: ${media}/dia</div>
         </div>
-    `;
+      `;
       document.getElementById('date-stats-cards').innerHTML = html;
     }
 
@@ -1467,7 +1481,8 @@
       dataAtual = data;
       dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
       var dataStr = data === '1105' ? 'Segunda-feira' : data === '1205' ? 'Terça-feira' : data === '1305' ? 'Quarta-feira' : data === '1405' ? 'Quinta-feira' : data === '1505' ? 'Sexta-feira' : 'Total Acumulado';
-      document.getElementById('page-sub').textContent = `Semana ${activeDashboard} - Dashboard Corporativo - ${dataStr}`;
+      var dataExibicao = (data !== 'acumulado') ? ` (${configCalendario[activeDashboard].dias[data]})` : '';
+      document.getElementById('page-sub').textContent = `Semana ${activeDashboard} - Dashboard Corporativo - ${dataStr}${dataExibicao}`;
       atualizarDashboardCompleto();
       mostrarToast(`Visualizando ${dataStr}`);
     }
@@ -1516,12 +1531,16 @@
       });
       document.getElementById(`db-btn-${dbNumber}`).classList.add('active');
 
+      // Atualiza o range de datas do calendário na sidebar
+      document.getElementById('db-active-range').textContent = `📅 Período: ${configCalendario[dbNumber].inicio} a ${configCalendario[dbNumber].fim}`;
+
       // Atualiza títulos e legendas
       var titles = { geral: 'Visão Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
       document.getElementById('page-title').textContent = `Semana ${activeDashboard} - ${titles[paginaAtual]}`;
 
       var dataStr = dataAtual === '1105' ? 'Segunda-feira' : dataAtual === '1205' ? 'Terça-feira' : dataAtual === '1305' ? 'Quarta-feira' : dataAtual === '1405' ? 'Quinta-feira' : dataAtual === '1505' ? 'Sexta-feira' : 'Total Acumulado';
-      document.getElementById('page-sub').textContent = `Semana ${activeDashboard} - Dashboard Corporativo - ${dataStr}`;
+      var dataExibicao = (dataAtual !== 'acumulado') ? ` (${configCalendario[activeDashboard].dias[dataAtual]})` : '';
+      document.getElementById('page-sub').textContent = `Semana ${activeDashboard} - Dashboard Corporativo - ${dataStr}${dataExibicao}`;
 
       // Atualiza inputs de edição e redesenha a interface
       atualizarTabelasEdicao();
