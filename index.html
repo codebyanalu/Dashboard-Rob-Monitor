@@ -1,930 +1,199 @@
 <!doctype html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BI — Notas Recebidas | GCON SIAN</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>GCON SIAN — BI Notas Recebidas</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/design-system.css?v=14">
+  <link rel="stylesheet" href="css/layout.css?v=14">
+  <link rel="stylesheet" href="css/components.css?v=14">
+  <link rel="stylesheet" href="css/charts.css?v=14">
+  <link rel="stylesheet" href="css/print.css?v=14">
+
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <style>
-    /* ========== FONTS CORPORATIVAS ========== */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
-
-    /* ========== PADRÃO CROMÁTICO ========== */
-    :root {
-      --axia-azul-naval: #24286E;
-      --axia-laranja-eletrico: #FF6934;
-      --axia-cinza-escuro: #94958B;
-      --bg: #F5F5F5;
-      --card: #FFFFFF;
-      --texto: #1A1A1A;
-      --muted: #6B6B6B;
-      --border: #E5E5E5;
-      --sidebar: #24286E;
-      --success: #2E7D32;
-      --warning: #ED6C02;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--texto);
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* ========== SIDEBAR ========== */
-    .sidebar {
-      width: 260px;
-      background: var(--axia-azul-naval);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      flex-shrink: 0;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-      white-space: nowrap;
-    }
-
-    body.sidebar-collapsed .sidebar {
-      width: 70px;
-    }
-
-    body.sidebar-collapsed .sidebar-logo .logo-marca {
-      font-size: 12px;
-      text-align: center;
-    }
-
-    body.sidebar-collapsed .sidebar-logo p,
-    body.sidebar-collapsed .db-selector-container,
-    body.sidebar-collapsed .nav-label,
-    body.sidebar-collapsed .sidebar-footer {
-      display: none !important;
-    }
-
-    body.sidebar-collapsed .nav-item {
-      padding: 12px;
-      justify-content: center;
-      font-size: 0px;
-    }
-
-    body.sidebar-collapsed .nav-item .dot {
-      margin: 0;
-    }
-
-    .sidebar-logo {
-      padding: 28px 24px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    .sidebar-logo .logo-marca {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 4px;
-    }
-
-    .sidebar-logo .logo-marca span {
-      color: var(--axia-laranja-eletrico);
-    }
-
-    .sidebar-logo p {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.6);
-      margin-top: 6px;
-      font-weight: 400;
-    }
-
-    .sidebar-nav {
-      padding: 20px 0;
-      flex: 1;
-    }
-
-    .nav-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.4);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 8px 24px 4px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 24px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.7);
-      transition: all 0.2s;
-      border-left: 3px solid transparent;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
-    }
-
-    .nav-item.active {
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
-      border-left-color: var(--axia-laranja-eletrico);
-      font-weight: 600;
-    }
-
-    .nav-item .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      background: var(--axia-laranja-eletrico);
-    }
-
-    .sidebar-footer {
-      padding: 20px 24px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 10px;
-      color: rgba(255, 255, 255, 0.4);
-    }
-
-    /* ========== DB SELECTOR (PREMIUM CHANGER) ========== */
-    .db-selector-container {
-      padding: 16px 24px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .db-selector-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.4);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .db-selector {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 4px;
-      gap: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .db-selector-btn {
-      text-align: center;
-      padding: 8px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.65);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: none;
-      background: transparent;
-      outline: none;
-    }
-
-    .db-selector-btn:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .db-selector-btn.active {
-      background: var(--axia-laranja-eletrico);
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(255, 105, 52, 0.3);
-    }
-
-    /* ========== MAIN ========== */
-    .main {
-      flex: 1;
-      overflow: auto;
-    }
-
-    .topbar {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .topbar h1 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--axia-azul-naval);
-      letter-spacing: -0.3px;
-    }
-
-    .btn-toggle-sidebar {
-      background: none;
-      border: none;
-      color: var(--axia-azul-naval);
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 6px;
-      transition: all 0.2s;
-      outline: none;
-    }
-
-    .btn-toggle-sidebar:hover {
-      background: rgba(36, 40, 110, 0.08);
-    }
-
-    .topbar p {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 12px;
-    }
-
-    .btn-pdf {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--axia-azul-naval);
-      color: #fff;
-      border: 0;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-pdf:hover {
-      background: var(--axia-laranja-eletrico);
-      transform: translateY(-1px);
-    }
-
-    .btn-excel {
-      background: var(--success);
-    }
-
-    .btn-excel:hover {
-      background: #1B5E20;
-    }
-
-    .btn-reset {
-      background: var(--warning);
-    }
-
-    .btn-reset:hover {
-      background: #E65100;
-    }
-
-    .btn-edit-toggle {
-      background: var(--axia-laranja-eletrico);
-    }
-
-    .content {
-      padding: 28px 32px;
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    /* ========== PAINEL DE EDIÇÃO ========== */
-    .edit-panel {
-      background: var(--card);
-      border-radius: 16px;
-      margin-bottom: 24px;
-      border: 1px solid var(--border);
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .edit-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 20px;
-      background: #FAFAFA;
-      cursor: pointer;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .edit-header h4 {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--axia-azul-naval);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .edit-header span {
-      font-size: 18px;
-      transition: transform 0.2s;
-      color: var(--axia-laranja-eletrico);
-    }
-
-    .edit-body {
-      display: none;
-      padding: 20px;
-    }
-
-    .edit-body.open {
-      display: block;
-    }
-
-    .edit-tabs {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      border-bottom: 2px solid var(--border);
-    }
-
-    .edit-tab {
-      padding: 8px 20px;
-      cursor: pointer;
-      border-radius: 8px 8px 0 0;
-      font-weight: 600;
-      font-size: 13px;
-      background: #F5F5F5;
-      color: var(--muted);
-      transition: all 0.2s;
-    }
-
-    .edit-tab.active {
-      background: var(--axia-azul-naval);
-      color: #fff;
-    }
-
-    .edit-data {
-      display: none;
-    }
-
-    .edit-data.active {
-      display: block;
-    }
-
-    .edit-table {
-      width: 100%;
-      font-size: 13px;
-      border-collapse: collapse;
-    }
-
-    .edit-table th,
-    .edit-table td {
-      padding: 10px 12px;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .edit-table th {
-      background: #FAFAFA;
-      font-weight: 700;
-      color: var(--axia-azul-naval);
-    }
-
-    .edit-table input {
-      width: 80px;
-      padding: 8px;
-      text-align: center;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .edit-table input:focus {
-      outline: none;
-      border-color: var(--axia-laranja-eletrico);
-    }
-
-    .edit-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-      justify-content: flex-end;
-    }
-
-    .btn-apply {
-      background: var(--success);
-      color: #fff;
-      border: 0;
-      padding: 10px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
-    }
-
-    /* ========== DATE STATS CARDS ========== */
-    .date-stats-cards {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .date-stat-card {
-      background: linear-gradient(135deg, #fff 0%, #FAFAFA 100%);
-      border-radius: 16px;
-      padding: 16px;
-      border: 1px solid var(--border);
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-
-    .date-stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-      border-color: var(--axia-laranja-eletrico);
-    }
-
-    .date-stat-card.active-day {
-      border: 2px solid var(--axia-azul-naval);
-      background: linear-gradient(135deg, #EEF0FA 0%, #FFF 100%);
-      box-shadow: 0 4px 12px rgba(36, 40, 110, 0.08);
-    }
-
-    .date-stat-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .date-stat-value {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--axia-azul-naval);
-    }
-
-    .date-stat-total {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    .date-stat-diff {
-      font-size: 11px;
-      font-weight: 600;
-      margin-top: 4px;
-    }
-
-    .date-stat-diff.positive {
-      color: var(--success);
-    }
-
-    .date-stat-diff.negative {
-      color: var(--warning);
-    }
-
-    /* ========== CARDS ========== */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 20px;
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-      transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 5px;
-      height: 100%;
-      background: var(--c, var(--axia-azul-naval));
-    }
-
-    .card-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: var(--ci, #F0F0F0);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 14px;
-      font-size: 22px;
-    }
-
-    .card-title {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .card-value {
-      font-size: 34px;
-      font-weight: 800;
-      color: var(--texto);
-      line-height: 1.1;
-      margin-bottom: 6px;
-    }
-
-    .card-sub {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .card-badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      margin-top: 8px;
-    }
-
-    /* ========== GRID ========== */
-    .grid2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .panel {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .panel h3 {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--axia-azul-naval);
-      margin-bottom: 16px;
-    }
-
-    .insight {
-      background: linear-gradient(135deg, #F0F4FF 0%, #E8EDFF 100%);
-      border-left: 4px solid var(--axia-laranja-eletrico);
-      border-radius: 12px;
-      padding: 16px 20px;
-      font-size: 13px;
-      color: var(--axia-azul-naval);
-      line-height: 1.6;
-      margin-bottom: 20px;
-      font-weight: 500;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    thead tr {
-      background: #FAFAFA;
-    }
-
-    th {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 12px 14px;
-      border-bottom: 2px solid var(--border);
-      text-align: left;
-    }
-
-    td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    td.num,
-    th.num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-
-    tbody tr:hover {
-      background: #FAFAFA;
-    }
-
-    tbody tr:last-child td {
-      border-bottom: none;
-      font-weight: 700;
-      background: #F5F5F5;
-    }
-
-    .prog-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .prog-label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--muted);
-      width: 220px;
-      flex-shrink: 0;
-    }
-
-    .prog-wrap {
-      flex: 1;
-      background: #EEEEEE;
-      border-radius: 100px;
-      height: 10px;
-      overflow: hidden;
-    }
-
-    .prog-fill {
-      height: 100%;
-      border-radius: 100px;
-      transition: width 0.6s ease;
-    }
-
-    .prog-val {
-      font-size: 13px;
-      font-weight: 700;
-      min-width: 36px;
-      text-align: right;
-    }
-
-    .prog-pct {
-      font-size: 12px;
-      color: var(--muted);
-      min-width: 45px;
-      text-align: right;
-    }
-
-    .rank-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .rank-item:last-child {
-      border-bottom: none;
-    }
-
-    .rank-num {
-      width: 28px;
-      height: 28px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--axia-azul-naval) 0%, #1A1E5A 100%);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .rank-info {
-      flex: 1;
-    }
-
-    .rank-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--texto);
-    }
-
-    .rank-sub {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .rank-val {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--axia-laranja-eletrico);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--success);
-      color: #fff;
-      padding: 14px 24px;
-      border-radius: 12px;
-      display: none;
-      z-index: 2000;
-      animation: slideIn 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      font-weight: 500;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    @media print {
-
-      .sidebar,
-      .topbar,
-      .btn-pdf,
-      .edit-panel,
-      .date-stats-cards {
-        display: none !important;
-      }
-
-      .main {
-        width: 100%;
-      }
-
-      .content {
-        padding: 0;
-      }
-
-      .page {
-        display: block !important;
-        page-break-after: always;
-      }
-    }
-  </style>
 </head>
-
 <body>
 
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-marca">GCON | <span>SIAN</span></div>
-      <p>BI — Notas Recebidas</p>
+    <div class="sidebar-header">
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Recolher Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="sidebar-logo">
+        <div class="logo-marca">GCON <span>SIAN</span></div>
+        <p>BI — Notas Recebidas</p>
+      </div>
     </div>
 
-    <!-- SELETOR DE DASHBOARD (4 SEMANAS PARAMETRIZADAS) -->
-    <div class="db-selector-container">
-      <div class="db-selector-label">Período Operacional</div>
-      <div class="db-selector">
-        <button id="db-btn-1" class="db-selector-btn active" onclick="switchDashboard(1)">Semana 1</button>
-        <button id="db-btn-2" class="db-selector-btn" onclick="switchDashboard(2)">Semana 2</button>
-        <button id="db-btn-3" class="db-selector-btn" onclick="switchDashboard(3)">Semana 3</button>
-        <button id="db-btn-4" class="db-selector-btn" onclick="switchDashboard(4)">Semana 4</button>
+    <div class="sidebar-filters">
+
+      <div class="filter-group">
+        <div class="filter-label">Ano</div>
+        <div class="filter-row" id="year-selector">
+          <button class="filter-btn active" data-year="2026" onclick="switchYear(2026)">2026</button>
+          <!-- Add more years here if needed -->
+        </div>
       </div>
-      <div class="db-selector-date" id="db-active-range"
-        style="font-size: 10px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 6px; font-weight: 500; letter-spacing: 0.3px;">
-        📅 Período: 11/05 a 15/05</div>
+
+      <div class="filter-group">
+        <div class="filter-label">Mês</div>
+        <div class="filter-row" id="month-selector">
+          <button class="filter-btn" data-month="may" onclick="switchMonth('may')">Mai</button>
+          <button class="filter-btn" data-month="jun" onclick="switchMonth('jun')">Jun</button>
+          <button class="filter-btn" data-month="jul" onclick="switchMonth('jul')">Jul</button>
+          <button class="filter-btn" data-month="aug" onclick="switchMonth('aug')">Ago</button>
+          <button class="filter-btn" data-month="sep" onclick="switchMonth('sep')">Set</button>
+          <button class="filter-btn" data-month="oct" onclick="switchMonth('oct')">Out</button>
+          <button class="filter-btn" data-month="nov" onclick="switchMonth('nov')">Nov</button>
+          <button class="filter-btn" data-month="dec" onclick="switchMonth('dec')">Dez</button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">Calendário</div>
+        <button class="cal-trigger" onclick="toggleCalModal()">
+          <span id="cal-trigger-label">📅 Selecionar data</span>
+          <span class="cal-trigger-arrow">▾</span>
+        </button>
+        <div id="db-active-range" class="filter-date">Período: —</div>
+      </div>
+      <div id="cal-modal-overlay" class="cal-modal-overlay" onclick="closeCalModal()">
+        <div class="cal-modal" onclick="event.stopPropagation()">
+          <div class="cal-modal-header">
+            <button class="cal-nav-btn" onclick="modalPrevMonth()">◀</button>
+            <span class="cal-modal-title" id="cal-modal-title">Maio 2026</span>
+            <button class="cal-nav-btn" onclick="modalNextMonth()">▶</button>
+          </div>
+          <table class="cal-modal-table">
+            <thead><tr>
+              <th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th>
+            </tr></thead>
+            <tbody id="cal-modal-body"></tbody>
+          </table>
+          <div class="cal-modal-footer">
+            <span class="cal-modal-info" id="cal-modal-info">Clique em um dia para visualizar</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <nav class="sidebar-nav">
       <div class="nav-label">Navegação</div>
       <div class="nav-item active" onclick="showPage('geral',this)">
-        <div class="dot"></div>Visão Geral
+        <div class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </div>
+        <span class="nav-text">Visão Geral</span>
       </div>
       <div class="nav-item" onclick="showPage('hp',this)">
-        <div class="dot"></div>HP
+        <div class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </div>
+        <span class="nav-text">HP</span>
       </div>
       <div class="nav-item" onclick="showPage('urbi_recanto',this)">
-        <div class="dot"></div>URBI Recanto
+        <div class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        </div>
+        <span class="nav-text">URBI Recanto</span>
       </div>
       <div class="nav-item" onclick="showPage('urbi_samambaia',this)">
-        <div class="dot"></div>URBI Samambaia
+        <div class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        </div>
+        <span class="nav-text">URBI Samambaia</span>
       </div>
       <div class="nav-item" onclick="showPage('maas',this)">
-        <div class="dot"></div>MAAS
+        <div class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+        </div>
+        <span class="nav-text">MAAS</span>
       </div>
     </nav>
-    <div class="sidebar-footer">© GCON SIAN • Dados operacionais</div>
+
+    <div class="sidebar-footer">
+      <span>GCON SIAN</span>
+      <span>Dados operacionais</span>
+    </div>
   </aside>
 
   <div class="main">
-    <div class="topbar">
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <button class="btn-toggle-sidebar" id="sidebarToggle" onclick="toggleSidebar()" title="Recolher Menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round" style="color: var(--axia-azul-naval);">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
+    <header class="topbar">
+      <div class="topbar-left">
         <div>
           <h1 id="page-title">Visão Geral</h1>
           <p id="page-sub">Dashboard Corporativo</p>
         </div>
       </div>
-      <div class="btn-group">
-        <button class="btn-pdf btn-excel" onclick="exportExcel()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+      <div class="topbar-right">
+        <button class="btn-primary btn-success" onclick="exportExcel()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="9" y1="3" x2="9" y2="21"></line>
             <line x1="15" y1="3" x2="15" y2="21"></line>
             <line x1="3" y1="9" x2="21" y2="9"></line>
             <line x1="3" y1="15" x2="21" y2="15"></line>
           </svg>
-          Exportar Excel
+          <span>Exportar Excel</span>
         </button>
-        <button class="btn-pdf" onclick="exportPDF()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-            stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+        <button class="btn-primary" onclick="exportPDF()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
             <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
-          Exportar PDF
+          <span>Exportar PDF</span>
         </button>
       </div>
-    </div>
+    </header>
 
     <div class="content">
-      <!-- O painel de edição rápida foi removido a pedido do usuário -->
 
-      <!-- DATE STATS CARDS - TOTAIS DOS DIAS -->
       <div class="date-stats-cards" id="date-stats-cards"></div>
 
-      <!-- GERAL -->
       <section id="geral" class="page active">
         <div class="cards">
-          <div class="card" style="--c:#24286E;--ci:#EEF0FA">
-            <div class="card-icon">📊</div>
+          <div class="card">
+            <div class="card-accent" style="background:#1B1F5E"></div>
             <div class="card-title">Total Geral</div>
             <div class="card-value" id="total-geral">0</div>
             <div class="card-sub">Monitor + Pré-nota</div>
           </div>
-          <div class="card" style="--c:#2E7D32;--ci:#E8F5E9">
-            <div class="card-icon">🖥️</div>
+          <div class="card">
+            <div class="card-accent" style="background:#2E7D32"></div>
             <div class="card-title">Monitor</div>
             <div class="card-value" id="total-monitor">0</div>
             <div class="card-badge" style="background:#E8F5E9;color:#2E7D32" id="monitor-pct">0%</div>
           </div>
-          <div class="card" style="--c:#ED6C02;--ci:#FFF3E0">
-            <div class="card-icon">📄</div>
+          <div class="card">
+            <div class="card-accent" style="background:#ED6C02"></div>
             <div class="card-title">Pré-nota</div>
             <div class="card-value" id="total-prenota">0</div>
             <div class="card-badge" style="background:#FFF3E0;color:#ED6C02" id="prenota-pct">0%</div>
           </div>
-          <div class="card" style="--c:#FF6934;--ci:#FFF0EB">
-            <div class="card-icon">🤖</div>
+          <div class="card">
+            <div class="card-accent" style="background:#FF6B35"></div>
             <div class="card-title">Robô</div>
             <div class="card-value" id="total-robo">0</div>
-            <div class="card-badge" style="background:#FFF0EB;color:#FF6934" id="robo-pct">% do Monitor</div>
+            <div class="card-badge" style="background:#FFF0EB;color:#FF6B35" id="robo-pct">% do Monitor</div>
           </div>
         </div>
 
@@ -940,21 +209,23 @@
             <div id="g_pie" style="height:260px"></div>
           </div>
         </div>
+
         <div class="panel" style="margin-bottom:20px">
           <h3>Comparativo por Categoria</h3>
           <div id="g_group" style="height:280px"></div>
         </div>
+
         <div class="panel" style="margin-bottom:20px">
           <h3>Ranking de Empresas</h3>
           <div id="ranking-list"></div>
         </div>
+
         <div class="panel">
           <h3>Tabela Consolidada</h3>
           <div id="tabela-consolidada"></div>
         </div>
       </section>
 
-      <!-- HP -->
       <section id="hp" class="page">
         <div class="cards" id="hp-cards"></div>
         <div class="insight" id="insight-hp"></div>
@@ -968,7 +239,7 @@
             <div id="hp_pie" style="height:260px"></div>
           </div>
         </div>
-        <div class="panel" id="hp-progress"></div>
+        <div class="panel" id="hp-progress" style="margin-bottom:20px"></div>
         <div class="panel" id="tabela-hp"></div>
       </section>
 
@@ -985,7 +256,7 @@
             <div id="rec_pie" style="height:260px"></div>
           </div>
         </div>
-        <div class="panel" id="rec-progress"></div>
+        <div class="panel" id="rec-progress" style="margin-bottom:20px"></div>
         <div class="panel" id="tabela-rec"></div>
       </section>
 
@@ -1002,7 +273,7 @@
             <div id="sam_pie" style="height:260px"></div>
           </div>
         </div>
-        <div class="panel" id="sam-progress"></div>
+        <div class="panel" id="sam-progress" style="margin-bottom:20px"></div>
         <div class="panel" id="tabela-sam"></div>
       </section>
 
@@ -1019,652 +290,70 @@
             <div id="maas_pie" style="height:260px"></div>
           </div>
         </div>
-        <div class="panel" id="maas-progress"></div>
+        <div class="panel" id="maas-progress" style="margin-bottom:20px"></div>
         <div class="panel" id="tabela-maas"></div>
       </section>
+
     </div>
   </div>
 
-  <div id="toast" class="toast">✅ Operação concluída!</div>
-
-  <script>
-    // ========== CONFIGURAÇÃO DE DATAS E CALENDÁRIO DAS SEMANAS ==========
-    // DIGITE E ALTERE AS DATAS DE EXIBIÇÃO DE CADA DIA E SEMANA AQUI
-    var configCalendario = {
-      1: { inicio: "11/05", fim: "15/05", dias: { "1105": "11/05", "1205": "12/05", "1305": "13/05", "1405": "14/05", "1505": "15/05" } },
-      2: { inicio: "18/05", fim: "22/05", dias: { "1105": "18/05", "1205": "19/05", "1305": "20/05", "1405": "21/05", "1505": "22/05" } },
-      3: { inicio: "25/05", fim: "29/05", dias: { "1105": "25/05", "1205": "26/05", "1305": "27/05", "1405": "28/05", "1505": "29/05" } },
-      4: { inicio: "01/06", fim: "05/06", dias: { "1105": "01/06", "1205": "02/06", "1305": "03/06", "1405": "04/06", "1505": "05/06" } }
-    };
-
-    // ========== CONTROLE DE ESTADOS DE DASHBOARDS DE SEMANAS ==========
-    // SEMANA 1 (VALORES PADRÃO OPERACIONAIS)
-    var defaultDadosSemana1 = {
-      "1105": { hp: { monitor: 16, prenota: 4, robo: 12, total: 20 }, urbi_recanto: { monitor: 11, prenota: 6, robo: 11, total: 17 }, urbi_samambaia: { monitor: 0, prenota: 13, robo: 0, total: 13 }, maas: { monitor: 11, prenota: 17, robo: 10, total: 28 } },
-      "1205": { hp: { monitor: 21, prenota: 5, robo: 15, total: 26 }, urbi_recanto: { monitor: 1, prenota: 32, robo: 1, total: 33 }, urbi_samambaia: { monitor: 0, prenota: 16, robo: 0, total: 16 }, maas: { monitor: 16, prenota: 19, robo: 12, total: 35 } },
-      "1305": { hp: { monitor: 23, prenota: 17, robo: 19, total: 40 }, urbi_recanto: { monitor: 8, prenota: 4, robo: 8, total: 12 }, urbi_samambaia: { monitor: 3, prenota: 19, robo: 2, total: 22 }, maas: { monitor: 18, prenota: 21, robo: 11, total: 39 } },
-      "1405": { hp: { monitor: 21, prenota: 6, robo: 18, total: 27 }, urbi_recanto: { monitor: 20, prenota: 5, robo: 19, total: 25 }, urbi_samambaia: { monitor: 10, prenota: 14, robo: 8, total: 24 }, maas: { monitor: 15, prenota: 7, robo: 12, total: 22 } },
-      "1505": { hp: { monitor: 33, prenota: 10, robo: 26, total: 43 }, urbi_recanto: { monitor: 4, prenota: 4, robo: 3, total: 8 }, urbi_samambaia: { monitor: 8, prenota: 5, robo: 6, total: 13 }, maas: { monitor: 22, prenota: 7, robo: 18, total: 29 } }
-    };
-
-    // SEMANA 2 (DIGITE OS DADOS DA SEMANA 2 AQUI)
-    var defaultDadosSemana2 = {
-      "1105": { hp: { monitor: 13, prenota: 21, robo: 7, total: 34 }, urbi_recanto: { monitor: 8, prenota: 10, robo: 7, total: 18 }, urbi_samambaia: { monitor: 4, prenota: 21, robo: 4, total: 25 }, maas: { monitor: 13, prenota: 17, robo: 9, total: 30 } },
-      "1205": { hp: { monitor: 0, prenota: 23, robo: 0, total: 23 }, urbi_recanto: { monitor: 2, prenota: 12, robo: 2, total: 14 }, urbi_samambaia: { monitor: 0, prenota: 18, robo: 0, total: 18 }, maas: { monitor: 6, prenota: 18, robo: 4, total: 24 } },
-      "1305": { hp: { monitor: 23, prenota: 8, robo: 19, total: 31 }, urbi_recanto: { monitor: 9, prenota: 5, robo: 9, total: 14 }, urbi_samambaia: { monitor: 12, prenota: 5, robo: 10, total: 17 }, maas: { monitor: 17, prenota: 14, robo: 11, total: 31 } },
-      "1405": { hp: { monitor: 24, prenota: 8, robo: 19, total: 32 }, urbi_recanto: { monitor: 13, prenota: 4, robo: 13, total: 17 }, urbi_samambaia: { monitor: 7, prenota: 14, robo: 6, total: 21 }, maas: { monitor: 16, prenota: 10, robo: 13, total: 26 } },
-      "1505": { hp: { monitor: 13, prenota: 5, robo: 7, total: 18 }, urbi_recanto: { monitor: 15, prenota: 4, robo: 12, total: 19 }, urbi_samambaia: { monitor: 7, prenota: 20, robo: 5, total: 27 }, maas: { monitor: 30, prenota: 12, robo: 18, total: 42 } }
-    };
-
-    // SEMANA 3 (DIGITE OS DADOS DA SEMANA 3 AQUI)
-    var defaultDadosSemana3 = {
-      "1105": { hp: { monitor: 29, prenota: 8, robo: 24, total: 37 }, urbi_recanto: { monitor: 11, prenota: 12, robo: 11, total: 23 }, urbi_samambaia: { monitor: 8, prenota: 18, robo: 8, total: 26 }, maas: { monitor: 18, prenota: 7, robo: 12, total: 25 } },
-      "1205": { hp: { monitor: 18, prenota: 7, robo: 10, total: 25 }, urbi_recanto: { monitor: 8, prenota: 12, robo: 4, total: 20 }, urbi_samambaia: { monitor: 13, prenota: 8, robo: 12, total: 21 }, maas: { monitor: 15, prenota: 13, robo: 12, total: 28 } },
-      "1305": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
-      "1405": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
-      "1505": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
-    };
-
-    // SEMANA 4 (DIGITE OS DADOS DA SEMANA 4 AQUI)
-    var defaultDadosSemana4 = {
-      "1105": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
-      "1205": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
-      "1305": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
-      "1405": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } },
-      "1505": { hp: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 }, urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 }, maas: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
-    };
-
-    var activeDashboard = 1;
-    var dadosSemana1 = JSON.parse(JSON.stringify(defaultDadosSemana1));
-    var dadosSemana2 = JSON.parse(JSON.stringify(defaultDadosSemana2));
-    var dadosSemana3 = JSON.parse(JSON.stringify(defaultDadosSemana3));
-    var dadosSemana4 = JSON.parse(JSON.stringify(defaultDadosSemana4));
-
-    var dadosPorData = dadosSemana1;
-    var dataAtual = "1105";
-    var paginaAtual = "geral";
-    var dados = dadosPorData["1105"];
-
-    function getDadosAcumulados() {
-      var empresas = ['hp', 'urbi_recanto', 'urbi_samambaia', 'maas'];
-      var sum = {};
-      empresas.forEach(emp => { sum[emp] = { monitor: 0, prenota: 0, robo: 0, total: 0 }; });
-      ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
-        empresas.forEach(emp => {
-          sum[emp].monitor += dadosPorData[d][emp].monitor;
-          sum[emp].prenota += dadosPorData[d][emp].prenota;
-          sum[emp].robo += dadosPorData[d][emp].robo;
-          sum[emp].total += dadosPorData[d][emp].total;
-        });
-      });
-      return sum;
-    }
-
-    function getValorDiaContexto(data, pagina) {
-      if (pagina === 'geral') {
-        var d = dadosPorData[data];
-        return d.hp.total + d.urbi_recanto.total + d.urbi_samambaia.total + d.maas.total;
-      } else {
-        return dadosPorData[data][pagina].total;
-      }
-    }
-
-    function getTotalData(data) {
-      var d = dadosPorData[data];
-      return d.hp.total + d.urbi_recanto.total + d.urbi_samambaia.total + d.maas.total;
-    }
-
-    function getTotalGeralAcumulado() {
-      return getTotalData("1105") + getTotalData("1205") + getTotalData("1305") + getTotalData("1405") + getTotalData("1505");
-    }
-
-    function getTotal(empresa) { return dados[empresa].total; }
-    function getTotaisGeral() {
-      var totalMonitor = dados.hp.monitor + dados.urbi_recanto.monitor + dados.urbi_samambaia.monitor + dados.maas.monitor;
-      var totalPrenota = dados.hp.prenota + dados.urbi_recanto.prenota + dados.urbi_samambaia.prenota + dados.maas.prenota;
-      var totalRobo = dados.hp.robo + dados.urbi_recanto.robo + dados.urbi_samambaia.robo + dados.maas.robo;
-      var totalGeral = totalMonitor + totalPrenota;
-      return { geral: totalGeral, totalMonitor, totalPrenota, totalRobo };
-    }
-
-    // ========== ATUALIZAR DASHBOARD ==========
-    function atualizarDashboardCompleto() {
-      atualizarDateStatsCards();
-      atualizarCardsGerais();
-      atualizarGraficosGerais();
-      atualizarTabelaConsolidada();
-      atualizarRanking();
-      atualizarInsightGeral();
-
-      atualizarCardsEmpresa('hp', 'hp-cards', 'HP');
-      atualizarCardsEmpresa('urbi_recanto', 'rec-cards', 'URBI Recanto');
-      atualizarCardsEmpresa('urbi_samambaia', 'sam-cards', 'URBI Samambaia');
-      atualizarCardsEmpresa('maas', 'maas-cards', 'MAAS');
-
-      atualizarGraficosEmpresa('hp', 'hp_bar', 'hp_pie');
-      atualizarGraficosEmpresa('urbi_recanto', 'rec_bar', 'rec_pie');
-      atualizarGraficosEmpresa('urbi_samambaia', 'sam_bar', 'sam_pie');
-      atualizarGraficosEmpresa('maas', 'maas_bar', 'maas_pie');
-
-      atualizarProgressoEmpresa('hp', 'hp-progress');
-      atualizarProgressoEmpresa('urbi_recanto', 'rec-progress');
-      atualizarProgressoEmpresa('urbi_samambaia', 'sam-progress');
-      atualizarProgressoEmpresa('maas', 'maas-progress');
-
-      atualizarTabelaEmpresa('hp', 'tabela-hp', 'HP');
-      atualizarTabelaEmpresa('urbi_recanto', 'tabela-rec', 'URBI Recanto');
-      atualizarTabelaEmpresa('urbi_samambaia', 'tabela-sam', 'URBI Samambaia');
-      atualizarTabelaEmpresa('maas', 'tabela-maas', 'MAAS');
-
-      atualizarInsightEmpresa('hp', 'insight-hp', 'HP');
-      atualizarInsightEmpresa('urbi_recanto', 'insight-rec', 'URBI Recanto');
-      atualizarInsightEmpresa('urbi_samambaia', 'insight-sam', 'URBI Samambaia');
-      atualizarInsightEmpresa('maas', 'insight-maas', 'MAAS');
-    }
-
-    function atualizarDateStatsCards() {
-      var total1105 = getValorDiaContexto("1105", paginaAtual);
-      var total1205 = getValorDiaContexto("1205", paginaAtual);
-      var total1305 = getValorDiaContexto("1305", paginaAtual);
-      var total1405 = getValorDiaContexto("1405", paginaAtual);
-      var total1505 = getValorDiaContexto("1505", paginaAtual);
-      var totalGeral = total1105 + total1205 + total1305 + total1405 + total1505;
-      var media = Math.round(totalGeral / 5);
-
-      var dias = configCalendario[activeDashboard].dias;
-
-      var html = `
-        <div class="date-stat-card ${dataAtual === '1105' ? 'active-day' : ''}" onclick="changeData('1105')">
-            <div class="date-stat-label">Segunda-feira</div>
-            <div class="date-stat-value">${total1105}</div>
-            <div class="date-stat-total">notas (${dias["1105"]})</div>
-        </div>
-        <div class="date-stat-card ${dataAtual === '1205' ? 'active-day' : ''}" onclick="changeData('1205')">
-            <div class="date-stat-label">Terça-feira</div>
-            <div class="date-stat-value">${total1205}</div>
-            <div class="date-stat-total">notas (${dias["1205"]})</div>
-            <div class="date-stat-diff ${total1205 >= total1105 ? 'positive' : 'negative'}">${total1205 >= total1105 ? '↑' : '↓'} ${Math.abs(total1205 - total1105)} vs Seg</div>
-        </div>
-        <div class="date-stat-card ${dataAtual === '1305' ? 'active-day' : ''}" onclick="changeData('1305')">
-            <div class="date-stat-label">Quarta-feira</div>
-            <div class="date-stat-value">${total1305}</div>
-            <div class="date-stat-total">notas (${dias["1305"]})</div>
-            <div class="date-stat-diff ${total1305 >= total1205 ? 'positive' : 'negative'}">${total1305 >= total1205 ? '↑' : '↓'} ${Math.abs(total1305 - total1205)} vs Ter</div>
-        </div>
-        <div class="date-stat-card ${dataAtual === '1405' ? 'active-day' : ''}" onclick="changeData('1405')">
-            <div class="date-stat-label">Quinta-feira</div>
-            <div class="date-stat-value">${total1405}</div>
-            <div class="date-stat-total">notas (${dias["1405"]})</div>
-            <div class="date-stat-diff ${total1405 >= total1305 ? 'positive' : 'negative'}">${total1405 >= total1305 ? '↑' : '↓'} ${Math.abs(total1405 - total1305)} vs Qua</div>
-        </div>
-        <div class="date-stat-card ${dataAtual === '1505' ? 'active-day' : ''}" onclick="changeData('1505')">
-            <div class="date-stat-label">Sexta-feira</div>
-            <div class="date-stat-value">${total1505}</div>
-            <div class="date-stat-total">notas (${dias["1505"]})</div>
-            <div class="date-stat-diff ${total1505 >= total1405 ? 'positive' : 'negative'}">${total1505 >= total1405 ? '↑' : '↓'} ${Math.abs(total1505 - total1405)} vs Qui</div>
-        </div>
-        <div class="date-stat-card ${dataAtual === 'acumulado' ? 'active-day' : ''}" onclick="changeData('acumulado')">
-            <div class="date-stat-label">Total Acumulado</div>
-            <div class="date-stat-value">${totalGeral}</div>
-            <div class="date-stat-total">notas (5 dias)</div>
-            <div class="date-stat-diff positive">média: ${media}/dia</div>
-        </div>
-      `;
-      document.getElementById('date-stats-cards').innerHTML = html;
-    }
-
-    function atualizarCardsGerais() {
-      var totais = getTotaisGeral();
-      document.getElementById('total-geral').textContent = totais.geral;
-      document.getElementById('total-monitor').textContent = totais.totalMonitor;
-      document.getElementById('total-prenota').textContent = totais.totalPrenota;
-      document.getElementById('total-robo').textContent = totais.totalRobo;
-      if (totais.totalMonitor > 0) {
-        document.getElementById('monitor-pct').textContent = ((totais.totalMonitor / totais.geral) * 100).toFixed(1) + '%';
-        document.getElementById('prenota-pct').textContent = ((totais.totalPrenota / totais.geral) * 100).toFixed(1) + '%';
-        document.getElementById('robo-pct').textContent = ((totais.totalRobo / totais.totalMonitor) * 100).toFixed(1) + '% do Monitor';
-      }
-    }
-
-    function atualizarGraficosGerais() {
-      var empresas = ['MAAS', 'HP', 'URBI Recanto', 'URBI Samambaia'];
-      var totais = [getTotal('maas'), getTotal('hp'), getTotal('urbi_recanto'), getTotal('urbi_samambaia')];
-      var monitor = [dados.maas.monitor, dados.hp.monitor, dados.urbi_recanto.monitor, dados.urbi_samambaia.monitor];
-      var prenota = [dados.maas.prenota, dados.hp.prenota, dados.urbi_recanto.prenota, dados.urbi_samambaia.prenota];
-      var robo = [dados.maas.robo, dados.hp.robo, dados.urbi_recanto.robo, dados.urbi_samambaia.robo];
-
-      var maxTotal = Math.max(...totais);
-      Plotly.newPlot('g_bar', [{ x: empresas, y: totais, type: 'bar', marker: { color: ['#FF6934', '#24286E', '#2E7D32', '#94958B'] }, text: totais, textposition: 'outside' }], { margin: { t: 30, l: 40, r: 10, b: 60 }, yaxis: { title: 'Quantidade', color: '#6B6B6B', range: [0, maxTotal * 1.15 || 10] }, showlegend: false, font: { family: 'Inter', size: 12 } }, { displayModeBar: false });
-
-      var roboEscriturado = robo[0] + robo[1] + robo[2] + robo[3];
-      var monitorNaoEscriturado = monitor[0] + monitor[1] + monitor[2] + monitor[3] - roboEscriturado;
-      var totalPrenota = prenota[0] + prenota[1] + prenota[2] + prenota[3];
-      Plotly.newPlot('g_pie', [{ labels: ['Escriturado pelo robô', 'Não escrituradas pelo robô', 'Pré-nota'], values: [roboEscriturado, monitorNaoEscriturado, totalPrenota], type: 'pie', textinfo: 'label+percent', marker: { colors: ['#FF6934', '#24286E', '#ED6C02'] }, hole: .35 }], { margin: { t: 10, l: 10, r: 10, b: 10 }, showlegend: true, legend: { orientation: 'h', y: -0.15 }, font: { family: 'Inter', size: 11 } }, { displayModeBar: false });
-
-      Plotly.newPlot('g_group', [
-        { x: empresas, y: monitor, name: 'Monitor', type: 'bar', marker: { color: '#2E7D32' } },
-        { x: empresas, y: prenota, name: 'Pré-nota', type: 'bar', marker: { color: '#ED6C02' } },
-        { x: empresas, y: robo, name: 'Robô', type: 'bar', marker: { color: '#FF6934' } }
-      ], { barmode: 'group', margin: { t: 10, l: 40, r: 10, b: 60 }, yaxis: { title: 'Quantidade' }, legend: { orientation: 'h', y: 1.1 }, font: { family: 'Inter', size: 11 } }, { displayModeBar: false });
-    }
-
-    function atualizarTabelaConsolidada() {
-      var empresas = ['MAAS', 'HP', 'URBI Recanto', 'URBI Samambaia'];
-      var keys = ['maas', 'hp', 'urbi_recanto', 'urbi_samambaia'];
-      var totalGeral = getTotaisGeral().geral;
-      var html = '<thead><tr><th>Empresa</th><th class="num">Total</th><th class="num">Monitor</th><th class="num">Pré-nota</th><th class="num">Robô</th><th class="num">% Robô/Monitor</th><th class="num">Part. geral</th></tr></thead><tbody>';
-      for (var i = 0; i < keys.length; i++) {
-        var k = keys[i];
-        var total = getTotal(k);
-        var pctRoboMonitor = dados[k].monitor > 0 ? ((dados[k].robo / dados[k].monitor) * 100).toFixed(1) + '%' : '—';
-        var partGeral = totalGeral > 0 ? ((total / totalGeral) * 100).toFixed(1) + '%' : '0%';
-        html += `<tr><td class="num">${empresas[i]}</td><td class="num">${total}</td><td class="num">${dados[k].monitor}</td><td class="num">${dados[k].prenota}</td><td class="num">${dados[k].robo}</td><td class="num">${pctRoboMonitor}</td><td class="num">${partGeral}</td></tr>`;
-      }
-      html += `<tr style="background:#F5F5F5;font-weight:700"><td class="num">Total</td><td class="num">${totalGeral}</td><td class="num">${getTotaisGeral().totalMonitor}</td><td class="num">${getTotaisGeral().totalPrenota}</td><td class="num">${getTotaisGeral().totalRobo}</td><td class="num">—</td><td class="num">100,0%</td></tr>`;
-      html += '</tbody>';
-      document.getElementById('tabela-consolidada').innerHTML = '<table>' + html + '</table>';
-    }
-
-    function atualizarRanking() {
-      var ranking = [
-        { nome: 'MAAS', total: getTotal('maas'), sub: `Monitor: ${dados.maas.monitor} | Pré-nota: ${dados.maas.prenota} | Robô: ${dados.maas.robo}` },
-        { nome: 'HP', total: getTotal('hp'), sub: `Monitor: ${dados.hp.monitor} | Pré-nota: ${dados.hp.prenota} | Robô: ${dados.hp.robo}` },
-        { nome: 'URBI Recanto', total: getTotal('urbi_recanto'), sub: `Monitor: ${dados.urbi_recanto.monitor} | Pré-nota: ${dados.urbi_recanto.prenota} | Robô: ${dados.urbi_recanto.robo}` },
-        { nome: 'URBI Samambaia', total: getTotal('urbi_samambaia'), sub: `Monitor: ${dados.urbi_samambaia.monitor} | Pré-nota: ${dados.urbi_samambaia.prenota} | Robô: ${dados.urbi_samambaia.robo}` }
-      ].sort((a, b) => b.total - a.total);
-      var html = '';
-      ranking.forEach((r, idx) => { html += `<div class="rank-item"><div class="rank-num">${idx + 1}</div><div class="rank-info"><div class="rank-name">${r.nome}</div><div class="rank-sub">${r.sub}</div></div><div class="rank-val">${r.total}</div></div>`; });
-      document.getElementById('ranking-list').innerHTML = html;
-    }
-
-    function atualizarInsightGeral() {
-      var totalGeral = getTotaisGeral().geral;
-      var periodoStr = dataAtual === '1105' ? 'na Segunda-feira' : dataAtual === '1205' ? 'na Terça-feira' : dataAtual === '1305' ? 'na Quarta-feira' : dataAtual === '1405' ? 'na Quinta-feira' : dataAtual === '1505' ? 'na Sexta-feira' : 'no Total Acumulado';
-
-      if (totalGeral === 0) {
-        document.getElementById('insight-geral').innerHTML = `<strong>📊 Insight Operacional:</strong> Nenhuma nota fiscal foi recebida ${periodoStr} até o momento.`;
-        return;
-      }
-
-      var empresas = [
-        { nome: 'MAAS', total: getTotal('maas') },
-        { nome: 'HP', total: getTotal('hp') },
-        { nome: 'URBI Recanto', total: getTotal('urbi_recanto') },
-        { nome: 'URBI Samambaia', total: getTotal('urbi_samambaia') }
-      ];
-
-      // Encontra a empresa com maior total
-      var lider = empresas.reduce((max, emp) => emp.total > max.total ? emp : max, empresas[0]);
-      var pctLider = ((lider.total / totalGeral) * 100).toFixed(1);
-
-      var eficienciaRobo = getTotaisGeral().totalMonitor > 0 ? ((getTotaisGeral().totalRobo / getTotaisGeral().totalMonitor) * 100).toFixed(1) : 0;
-
-      var insightStr = `<strong>📊 Insight Operacional:</strong> Tivemos um total de ${totalGeral} notas ${periodoStr}. `;
-      if (lider.total > 0) {
-        insightStr += `A empresa <strong>${lider.nome}</strong> apresenta o maior volume com ${lider.total} notas (${pctLider}% do total). `;
-      }
-
-      if (getTotaisGeral().totalMonitor > 0) {
-        insightStr += `A eficiência do robô na escrituração das notas do Monitor é de <strong>${eficienciaRobo}%</strong> (${getTotaisGeral().totalRobo} de ${getTotaisGeral().totalMonitor}).`;
-      } else {
-        insightStr += `Nenhuma nota foi recebida via Monitor para processamento do robô.`;
-      }
-
-      document.getElementById('insight-geral').innerHTML = insightStr;
-    }
-
-    function atualizarCardsEmpresa(emp, containerId, nome) {
-      var d = dados[emp];
-      var total = d.total;
-      var pctMonitor = total > 0 ? (d.monitor / total * 100).toFixed(1) : 0;
-      var pctPrenota = total > 0 ? (d.prenota / total * 100).toFixed(1) : 0;
-      var pctRoboMonitor = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) : 0;
-      document.getElementById(containerId).innerHTML = `
-        <div class="card" style="--c:#24286E;--ci:#EEF0FA"><div class="card-icon">📋</div><div class="card-title">Total ${nome}</div><div class="card-value">${total}</div><div class="card-sub">Monitor + Pré-nota</div></div>
-        <div class="card" style="--c:#2E7D32;--ci:#E8F5E9"><div class="card-icon">🖥️</div><div class="card-title">Monitor</div><div class="card-value">${d.monitor}</div><div class="card-badge" style="background:#E8F5E9;color:#2E7D32">${pctMonitor}%</div></div>
-        <div class="card" style="--c:#ED6C02;--ci:#FFF3E0"><div class="card-icon">📄</div><div class="card-title">Pré-nota</div><div class="card-value">${d.prenota}</div><div class="card-badge" style="background:#FFF3E0;color:#ED6C02">${pctPrenota}%</div></div>
-        <div class="card" style="--c:#FF6934;--ci:#FFF0EB"><div class="card-icon">🤖</div><div class="card-title">Robô</div><div class="card-value">${d.robo}</div><div class="card-badge" style="background:#FFF0EB;color:#FF6934">${pctRoboMonitor}% do Monitor</div></div>
-    `;
-    }
-
-    function atualizarGraficosEmpresa(emp, barId, pieId) {
-      var d = dados[emp];
-      var maxVal = Math.max(d.monitor, d.prenota, d.robo);
-      Plotly.newPlot(barId, [{ x: ['Monitor', 'Pré-nota', 'Robô'], y: [d.monitor, d.prenota, d.robo], type: 'bar', marker: { color: ['#2E7D32', '#ED6C02', '#FF6934'] }, text: [d.monitor, d.prenota, d.robo], textposition: 'outside' }], { margin: { t: 30, l: 40, r: 10, b: 60 }, yaxis: { title: 'Quantidade', range: [0, maxVal * 1.15 || 10] }, showlegend: false, font: { family: 'Inter' } }, { displayModeBar: false });
-
-      var naoEscriturado = d.monitor - d.robo;
-      var labels = [], values = [], colors = [];
-      if (d.robo > 0) { labels.push('Escriturado pelo robô'); values.push(d.robo); colors.push('#FF6934'); }
-      if (naoEscriturado > 0) { labels.push('Não escrituradas pelo robô'); values.push(naoEscriturado); colors.push('#24286E'); }
-      if (d.prenota > 0) { labels.push('Pré-nota'); values.push(d.prenota); colors.push('#ED6C02'); }
-      if (labels.length === 0) { labels.push('Sem dados'); values.push(1); colors.push('#94958B'); }
-      Plotly.newPlot(pieId, [{ labels: labels, values: values, type: 'pie', textinfo: 'label+percent', marker: { colors: colors }, hole: .35 }], { margin: { t: 10, l: 10, r: 10, b: 10 }, showlegend: true, legend: { orientation: 'h', y: -0.15 }, font: { family: 'Inter', size: 11 } }, { displayModeBar: false });
-    }
-
-    function atualizarProgressoEmpresa(emp, containerId) {
-      var d = dados[emp];
-      var total = d.total;
-      var pctMonitor = total > 0 ? (d.monitor / total * 100).toFixed(1) : 0;
-      var pctPrenota = total > 0 ? (d.prenota / total * 100).toFixed(1) : 0;
-      var pctRobo = total > 0 ? (d.robo / total * 100).toFixed(1) : 0;
-      document.getElementById(containerId).innerHTML = `
-        <h3>Distribuição sobre o total (${total})</h3>
-        <div class="prog-row"><span class="prog-label">Recebidas pelo Monitor</span><div class="prog-wrap"><div class="prog-fill" style="width:${pctMonitor}%;background:#2E7D32"></div></div><span class="prog-val">${d.monitor}</span><span class="prog-pct">${pctMonitor}%</span></div>
-        <div class="prog-row"><span class="prog-label">Recebidas pela Pré-nota</span><div class="prog-wrap"><div class="prog-fill" style="width:${pctPrenota}%;background:#ED6C02"></div></div><span class="prog-val">${d.prenota}</span><span class="prog-pct">${pctPrenota}%</span></div>
-        <div class="prog-row"><span class="prog-label">Escrituradas pelo robô</span><div class="prog-wrap"><div class="prog-fill" style="width:${pctRobo}%;background:#FF6934"></div></div><span class="prog-val">${d.robo}</span><span class="prog-pct">${pctRobo}%</span></div>
-    `;
-    }
-
-    function atualizarTabelaEmpresa(emp, containerId, nome) {
-      var d = dados[emp];
-      var total = d.total;
-      var naoEscriturado = d.monitor - d.robo;
-      var pctRobo = total > 0 ? (d.robo / total * 100).toFixed(1) : 0;
-      var pctNaoEscriturado = total > 0 ? (naoEscriturado / total * 100).toFixed(1) : 0;
-      var pctPrenota = total > 0 ? (d.prenota / total * 100).toFixed(1) : 0;
-      document.getElementById(containerId).innerHTML = `
-        <h3>Tabela — ${nome}</h3>
-        <table><thead><tr><th>Composição</th><th class="num">Quantidade</th><th class="num">% do total</th></tr></thead>
-        <tbody>
-            <tr><td class="num">Escriturado pelo robô</td><td class="num">${d.robo}</td><td class="num">${pctRobo}%</td></tr>
-            <tr><td class="num">Não escrituradas pelo robô</td><td class="num">${naoEscriturado}</td><td class="num">${pctNaoEscriturado}%</td></tr>
-            <tr><td class="num">Recebidas pela Pré-nota</td><td class="num">${d.prenota}</td><td class="num">${pctPrenota}%</td></tr>
-            <tr><td class="num">Total</td><td class="num">${total}</td><td class="num">100,0%</td></tr>
-        </tbody></table>
-    `;
-    }
-
-    function atualizarInsightEmpresa(emp, containerId, nome) {
-      var d = dados[emp];
-      var total = d.total;
-      var pctRoboMonitor = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) : 0;
-      var pctPrenota = total > 0 ? ((d.prenota / total) * 100).toFixed(1) : 0;
-      var periodoStr = dataAtual === '1105' ? 'na Segunda-feira' : dataAtual === '1205' ? 'na Terça-feira' : dataAtual === '1305' ? 'na Quarta-feira' : dataAtual === '1405' ? 'na Quinta-feira' : dataAtual === '1505' ? 'na Sexta-feira' : 'no Total Acumulado';
-
-      if (total === 0) {
-        document.getElementById(containerId).innerHTML = `<strong>📊 Insight ${nome}:</strong> Nenhuma movimentação registrada de notas ${periodoStr}.`;
-        return;
-      }
-
-      var insightText = `<strong>${nome}</strong> registrou um volume de ${total} notas ${periodoStr}. `;
-
-      if (d.monitor > 0) {
-        insightText += `O robô escriturou com sucesso ${d.robo} das ${d.monitor} notas recebidas pelo Monitor (eficiência de <strong>${pctRoboMonitor}%</strong>). `;
-      }
-
-      if (d.prenota > 0) {
-        insightText += `Foram recebidas ${d.prenota} notas via Pré-nota (${pctPrenota}% da volumetria).`;
-      }
-
-      document.getElementById(containerId).innerHTML = `<strong>📊 Insight ${nome}:</strong> ${insightText}`;
-    }
-
-    // ========== EDIÇÃO ==========
-    function atualizarTabelasEdicao() {
-      if (!document.getElementById('edit-1105-body')) return;
-      var empresas = [{ nome: 'MAAS', key: 'maas' }, { nome: 'HP', key: 'hp' }, { nome: 'URBI Recanto', key: 'urbi_recanto' }, { nome: 'URBI Samambaia', key: 'urbi_samambaia' }];
-      ['1105', '1205', '1305', '1405', '1505'].forEach(data => {
-        var tbody = document.getElementById(`edit-${data}-body`);
-        if (tbody) {
-          tbody.innerHTML = '';
-          empresas.forEach(emp => {
-            var d = dadosPorData[data][emp.key];
-            var row = tbody.insertRow();
-            row.insertCell(0).innerHTML = `<strong>${emp.nome}</strong>`;
-            row.insertCell(1).innerHTML = `<input type="number" id="edit-${data}-${emp.key}-monitor" value="${d.monitor}" min="0" step="1" onchange="validarRobo('${data}','${emp.key}')">`;
-            row.insertCell(2).innerHTML = `<input type="number" id="edit-${data}-${emp.key}-prenota" value="${d.prenota}" min="0" step="1">`;
-            row.insertCell(3).innerHTML = `<input type="number" id="edit-${data}-${emp.key}-robo" value="${d.robo}" min="0" step="1" onchange="validarRobo('${data}','${emp.key}')">`;
-            row.insertCell(4).innerHTML = `<span id="valid-${data}-${emp.key}" style="font-size:10px;">✓</span>`;
-          });
-        }
-      });
-    }
-
-    function validarRobo(data, empresa) {
-      var monitor = parseInt(document.getElementById(`edit-${data}-${empresa}-monitor`).value) || 0;
-      var robo = parseInt(document.getElementById(`edit-${data}-${empresa}-robo`).value) || 0;
-      var span = document.getElementById(`valid-${data}-${empresa}`);
-      if (robo > monitor) {
-        span.innerHTML = '⚠️ Robô > Monitor!';
-        span.style.color = '#FF6934';
-        span.style.fontWeight = 'bold';
-      } else {
-        span.innerHTML = '✓ OK';
-        span.style.color = '#2E7D32';
-      }
-    }
-
-    function applyEdits() {
-      var empresas = ['maas', 'hp', 'urbi_recanto', 'urbi_samambaia'];
-      ['1105', '1205', '1305', '1405', '1505'].forEach(data => {
-        empresas.forEach(emp => {
-          var novoMonitor = parseInt(document.getElementById(`edit-${data}-${emp}-monitor`).value) || 0;
-          var novoPrenota = parseInt(document.getElementById(`edit-${data}-${emp}-prenota`).value) || 0;
-          var novoRobo = parseInt(document.getElementById(`edit-${data}-${emp}-robo`).value) || 0;
-          if (novoRobo > novoMonitor) novoRobo = novoMonitor;
-          dadosPorData[data][emp] = {
-            monitor: novoMonitor,
-            prenota: novoPrenota,
-            robo: novoRobo,
-            total: novoMonitor + novoPrenota
-          };
-        });
-      });
-      dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
-      localStorage.setItem(`dashboardSemana${activeDashboard}`, JSON.stringify(dadosPorData));
-      atualizarDashboardCompleto();
-      mostrarToast('Dados atualizados e salvos!');
-    }
-
-    function resetData() {
-      if (activeDashboard === 1) {
-        dadosSemana1 = JSON.parse(JSON.stringify(defaultDadosSemana1));
-        dadosPorData = dadosSemana1;
-      } else if (activeDashboard === 2) {
-        dadosSemana2 = JSON.parse(JSON.stringify(defaultDadosSemana2));
-        dadosPorData = dadosSemana2;
-      } else if (activeDashboard === 3) {
-        dadosSemana3 = JSON.parse(JSON.stringify(defaultDadosSemana3));
-        dadosPorData = dadosSemana3;
-      } else if (activeDashboard === 4) {
-        dadosSemana4 = JSON.parse(JSON.stringify(defaultDadosSemana4));
-        dadosPorData = dadosSemana4;
-      }
-      localStorage.setItem(`dashboardSemana${activeDashboard}`, JSON.stringify(dadosPorData));
-      dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
-      atualizarTabelasEdicao();
-      atualizarDashboardCompleto();
-      mostrarToast('Dados resetados para o padrão!');
-    }
-
-    function changeData(data) {
-      dataAtual = data;
-      dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
-      var dataStr = data === '1105' ? 'Segunda-feira' : data === '1205' ? 'Terça-feira' : data === '1305' ? 'Quarta-feira' : data === '1405' ? 'Quinta-feira' : data === '1505' ? 'Sexta-feira' : 'Total Acumulado';
-      var dataExibicao = (data !== 'acumulado') ? ` (${configCalendario[activeDashboard].dias[data]})` : '';
-      document.getElementById('page-sub').textContent = `Semana ${activeDashboard} - Dashboard Corporativo - ${dataStr}${dataExibicao}`;
-      atualizarDashboardCompleto();
-      mostrarToast(`Visualizando ${dataStr}`);
-    }
-
-    function toggleEditPanel() {
-      var body = document.getElementById('editBody');
-      var header = document.querySelector('.edit-header span');
-      if (body.classList.contains('open')) {
-        body.classList.remove('open');
-        header.textContent = '▼';
-      } else {
-        body.classList.add('open');
-        header.textContent = '▲';
-      }
-    }
-
-    function showPage(id, el) {
-      paginaAtual = id;
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      if (el) el.classList.add('active');
-      var titles = { geral: 'Visão Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
-      document.getElementById('page-title').textContent = `Semana ${activeDashboard} - ${titles[id]}`;
-      atualizarDateStatsCards();
-    }
-
-    function switchDashboard(dbNumber) {
-      activeDashboard = dbNumber;
-
-      // Alterna ponteiro de dados
-      if (activeDashboard === 1) {
-        dadosPorData = dadosSemana1;
-      } else if (activeDashboard === 2) {
-        dadosPorData = dadosSemana2;
-      } else if (activeDashboard === 3) {
-        dadosPorData = dadosSemana3;
-      } else if (activeDashboard === 4) {
-        dadosPorData = dadosSemana4;
-      }
-      dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
-
-      // Atualiza botões do seletor
-      document.querySelectorAll('.db-selector-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      document.getElementById(`db-btn-${dbNumber}`).classList.add('active');
-
-      // Atualiza o range de datas do calendário na sidebar
-      document.getElementById('db-active-range').textContent = `📅 Período: ${configCalendario[dbNumber].inicio} a ${configCalendario[dbNumber].fim}`;
-
-      // Atualiza títulos e legendas
-      var titles = { geral: 'Visão Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
-      document.getElementById('page-title').textContent = `Semana ${activeDashboard} - ${titles[paginaAtual]}`;
-
-      var dataStr = dataAtual === '1105' ? 'Segunda-feira' : dataAtual === '1205' ? 'Terça-feira' : dataAtual === '1305' ? 'Quarta-feira' : dataAtual === '1405' ? 'Quinta-feira' : dataAtual === '1505' ? 'Sexta-feira' : 'Total Acumulado';
-      var dataExibicao = (dataAtual !== 'acumulado') ? ` (${configCalendario[activeDashboard].dias[dataAtual]})` : '';
-      document.getElementById('page-sub').textContent = `Semana ${activeDashboard} - Dashboard Corporativo - ${dataStr}${dataExibicao}`;
-
-      // Atualiza inputs de edição e redesenha a interface
-      atualizarTabelasEdicao();
-      atualizarDashboardCompleto();
-
-      mostrarToast(`Alternado para Semana ${activeDashboard}`);
-    }
-
-    async function exportPDF() {
-      var btn = document.querySelector('.btn-pdf:not(.btn-excel):not(.btn-edit-toggle)');
-      if (btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
-      var { jsPDF } = window.jspdf;
-      var pdf = new jsPDF('p', 'mm', 'a4');
-      var pageIds = ['geral', 'hp', 'urbi_recanto', 'urbi_samambaia', 'maas'];
-      var titles = ['Visão Geral', 'HP', 'URBI Recanto', 'URBI Samambaia', 'MAAS'];
-      for (var i = 0; i < pageIds.length; i++) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(pageIds[i]).classList.add('active');
-        document.getElementById('page-title').textContent = `Semana ${activeDashboard} - ${titles[i]}`;
-        await new Promise(r => setTimeout(r, 300));
-        var el = document.querySelector('.content');
-        var canvas = await html2canvas(el, { scale: 1.5, useCORS: true, backgroundColor: '#F5F5F5' });
-        var img = canvas.toDataURL('image/jpeg', 0.92);
-        var w = 210, h = (canvas.height * w) / canvas.width;
-        if (i > 0) pdf.addPage();
-        pdf.addImage(img, 'JPEG', 0, 0, w, h > 297 ? 297 : h);
-      }
-      showPage('geral', document.querySelector('.nav-item')); // Retorna suavemente
-      var dataStr = dataAtual === '1105' ? 'Segunda' : dataAtual === '1205' ? 'Terca' : dataAtual === '1305' ? 'Quarta' : dataAtual === '1405' ? 'Quinta' : dataAtual === '1505' ? 'Sexta' : 'Acumulado';
-      pdf.save(`GCON_SIAN_BI_Notas_Semana_${activeDashboard}_${dataStr}.pdf`);
-      if (btn) { btn.textContent = '📄 Exportar PDF'; btn.disabled = false; }
-    }
-
-    function exportExcel() {
-      var dataStr = dataAtual === '1105' ? 'Segunda-feira' : dataAtual === '1205' ? 'Terça-feira' : dataAtual === '1305' ? 'Quarta-feira' : dataAtual === '1405' ? 'Quinta-feira' : dataAtual === '1505' ? 'Sexta-feira' : 'Total Acumulado';
-      var dadosExport = [[`GCON SIAN - Dashboard de Notas Recebidas - Semana ${activeDashboard}`], [`Visualização: ${dataStr}`], []];
-      dadosExport.push(['Empresa', 'Monitor', 'Pré-nota', 'Robô', 'Total (Monitor+Pré-nota)', '% Robô/Monitor']);
-      var empresas = ['maas', 'hp', 'urbi_recanto', 'urbi_samambaia'];
-      var nomes = ['MAAS', 'HP', 'URBI Recanto', 'URBI Samambaia'];
-      empresas.forEach((key, idx) => {
-        var d = dados[key];
-        var pct = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) + '%' : '—';
-        dadosExport.push([nomes[idx], d.monitor, d.prenota, d.robo, d.total, pct]);
-      });
-      dadosExport.push([], ['RESUMO']);
-      dadosExport.push(['Dia da Semana', 'Total']);
-      dadosExport.push(['Segunda-feira', getValorDiaContexto('1105', paginaAtual)]);
-      dadosExport.push(['Terça-feira', getValorDiaContexto('1205', paginaAtual)]);
-      dadosExport.push(['Quarta-feira', getValorDiaContexto('1305', paginaAtual)]);
-      dadosExport.push(['Quinta-feira', getValorDiaContexto('1405', paginaAtual)]);
-      dadosExport.push(['Sexta-feira', getValorDiaContexto('1505', paginaAtual)]);
-      var totalAcumulado = getValorDiaContexto('1105', paginaAtual) + getValorDiaContexto('1205', paginaAtual) + getValorDiaContexto('1305', paginaAtual) + getValorDiaContexto('1405', paginaAtual) + getValorDiaContexto('1505', paginaAtual);
-      dadosExport.push(['TOTAL ACUMULADO', totalAcumulado]);
-      var ws = XLSX.utils.aoa_to_sheet(dadosExport);
-      var wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, `GCON_SIAN`);
-      XLSX.writeFile(wb, `GCON_SIAN_BI_Notas_Semana_${activeDashboard}.xlsx`);
-      mostrarToast('Excel exportado!');
-    }
-
-    function mostrarToast(msg) { var toast = document.getElementById('toast'); toast.textContent = msg || '✅ Operação concluída!'; toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', 2000); }
-
-    document.querySelectorAll('.edit-tab').forEach(tab => { tab.addEventListener('click', function () { document.querySelectorAll('.edit-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.edit-data').forEach(d => d.classList.remove('active')); this.classList.add('active'); var data = this.getAttribute('data-data'); document.getElementById(`edit-${data}`).classList.add('active'); changeData(data); }); });
-
-    function toggleSidebar() {
-      document.body.classList.toggle('sidebar-collapsed');
-      var collapsed = document.body.classList.contains('sidebar-collapsed');
-      localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
-      setTimeout(function () {
-        window.dispatchEvent(new Event('resize'));
-      }, 310);
-    }
-
-    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-      document.body.classList.add('sidebar-collapsed');
-    }
-
-    // Carrega dados persistidos do LocalStorage para as 4 semanas
-    var saved1 = localStorage.getItem('dashboardSemana1');
-    if (saved1) {
-      try {
-        var parsed1 = JSON.parse(saved1);
-        ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
-          if (parsed1[d]) dadosSemana1[d] = parsed1[d];
-        });
-      } catch (e) { }
-    }
-
-    var saved2 = localStorage.getItem('dashboardSemana2');
-    if (saved2) {
-      try {
-        var parsed2 = JSON.parse(saved2);
-        ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
-          if (parsed2[d]) dadosSemana2[d] = parsed2[d];
-        });
-      } catch (e) { }
-    }
-
-    var saved3 = localStorage.getItem('dashboardSemana3');
-    if (saved3) {
-      try {
-        var parsed3 = JSON.parse(saved3);
-        ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
-          if (parsed3[d]) dadosSemana3[d] = parsed3[d];
-        });
-      } catch (e) { }
-    }
-
-    var saved4 = localStorage.getItem('dashboardSemana4');
-    if (saved4) {
-      try {
-        var parsed4 = JSON.parse(saved4);
-        ['1105', '1205', '1305', '1405', '1505'].forEach(d => {
-          if (parsed4[d]) dadosSemana4[d] = parsed4[d];
-        });
-      } catch (e) { }
-    }
-
-    // Inicializa ponteiros de estado ativos para a semana corrente
-    dadosPorData = dadosSemana1;
-    dados = dataAtual === 'acumulado' ? getDadosAcumulados() : dadosPorData[dataAtual];
-    atualizarTabelasEdicao();
-    changeData(dataAtual);
-  </script>
+  <div id="toast" class="toast"></div>
+
+  <script src="config/colors.js?v=12"></script>
+  <script src="config/constants.js?v=12"></script>
+  <script src="data/2026/may/week-1.js?v=12"></script>
+  <script src="data/2026/may/week-2.js?v=12"></script>
+  <script src="data/2026/may/week-3.js?v=12"></script>
+  <script src="data/2026/may/week-4.js?v=12"></script>
+  <script src="data/2026/jun/week-5.js?v=12"></script>
+  <script src="data/2026/jun/week-6.js?v=12"></script>
+  <script src="data/2026/jun/week-7.js?v=12"></script>
+  <script src="data/2026/jun/week-8.js?v=12"></script>
+  <script src="data/2026/jul/week-9.js?v=12"></script>
+  <script src="data/2026/jul/week-10.js?v=12"></script>
+  <script src="data/2026/jul/week-11.js?v=12"></script>
+  <script src="data/2026/jul/week-12.js?v=12"></script>
+  <script src="data/2026/jul/week-13.js?v=12"></script>
+  <script src="data/2026/aug/week-14.js?v=12"></script>
+  <script src="data/2026/aug/week-15.js?v=12"></script>
+  <script src="data/2026/aug/week-16.js?v=12"></script>
+  <script src="data/2026/aug/week-17.js?v=12"></script>
+  <script src="data/2026/sep/week-18.js?v=12"></script>
+  <script src="data/2026/sep/week-19.js?v=12"></script>
+  <script src="data/2026/sep/week-20.js?v=12"></script>
+  <script src="data/2026/sep/week-21.js?v=12"></script>
+  <script src="data/2026/oct/week-22.js?v=12"></script>
+  <script src="data/2026/oct/week-23.js?v=12"></script>
+  <script src="data/2026/oct/week-24.js?v=12"></script>
+  <script src="data/2026/oct/week-25.js?v=12"></script>
+  <script src="data/2026/nov/week-26.js?v=12"></script>
+  <script src="data/2026/nov/week-27.js?v=12"></script>
+  <script src="data/2026/nov/week-28.js?v=12"></script>
+  <script src="data/2026/nov/week-29.js?v=12"></script>
+  <script src="data/2026/dec/week-30.js?v=12"></script>
+  <script src="data/2026/dec/week-31.js?v=12"></script>
+  <script src="data/2026/dec/week-32.js?v=12"></script>
+  <script src="data/2026/dec/week-33.js?v=12"></script>
+  <script src="data/2026/dec/week-34.js?v=12"></script>
+  <script src="data/2026/may/index.js?v=12"></script>
+  <script src="data/2026/jun/index.js?v=12"></script>
+  <script src="data/2026/jul/index.js?v=12"></script>
+  <script src="data/2026/aug/index.js?v=12"></script>
+  <script src="data/2026/sep/index.js?v=12"></script>
+  <script src="data/2026/oct/index.js?v=12"></script>
+  <script src="data/2026/nov/index.js?v=12"></script>
+  <script src="data/2026/dec/index.js?v=12"></script>
+  <script src="data/index.js?v=12"></script>
+  <script src="services/storage.js?v=12"></script>
+  <script src="services/calculations.js?v=12"></script>
+  <script src="transformers/metrics.js?v=12"></script>
+  <script src="js/state.js?v=12"></script>
+  <script src="js/charts.js?v=13"></script>
+  <script src="js/components.js?v=12"></script>
+  <script src="js/insights.js?v=12"></script>
+  <script src="js/export.js?v=12"></script>
+  <script src="js/utils.js?v=12"></script>
+  <script src="js/calendar.js?v=12"></script>
+  <script src="js/main.js?v=12"></script>
 </body>
-
 </html>

@@ -1,0 +1,23 @@
+.panel .js-plotly-plot,
+.panel .plot-container {
+  margin: -8px;
+}
+
+.panel .plotly .main-svg {
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.panel .plotly .hoverlayer .hovertext {
+  font-family: var(--font) !important;
+}
+
+.panel .plotly .legend .traces .legendtext {
+  font-family: var(--font) !important;
+  font-size: 11px !important;
+}
+
+.panel .plotly .gtitle {
+  font-family: var(--font) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
