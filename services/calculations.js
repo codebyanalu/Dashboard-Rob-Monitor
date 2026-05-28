@@ -17,6 +17,23 @@ function getDadosAcumulados(dadosPorData) {
   return sum;
 }
 
+function getDadosParaEmpresa(dados, empresaId) {
+  return dados && dados[empresaId] ? dados[empresaId] : { monitor: 0, prenota: 0, robo: 0, total: 0 };
+}
+
+function getDadosMaasPorPessoa(dados, personId) {
+  var empresaData = dados && dados['maas'] ? dados['maas'] : { monitor: 0, prenota: 0, robo: 0, total: 0 };
+  if (personId === 'all') return empresaData;
+  if (empresaData[personId]) return empresaData[personId];
+  var share = getMaasPersonShare(personId);
+  return {
+    monitor: Math.round(empresaData.monitor * share),
+    prenota: Math.round(empresaData.prenota * share),
+    robo: Math.round(empresaData.robo * share),
+    total: Math.round(empresaData.total * share)
+  };
+}
+
 function getTotaisGeral(dados) {
   var totalMonitor = 0, totalPrenota = 0, totalRobo = 0;
   EMPRESAS.forEach(function(emp) {
@@ -52,4 +69,68 @@ function getValorDiaContexto(dadosPorData, data, pagina) {
 
 function getTotalGeralAcumulado(dadosPorData) {
   return DAY_KEYS.reduce(function(sum, d) { return sum + getTotalData(dadosPorData, d); }, 0);
+}
+
+function parseDateNumeric(dateStr) {
+  var parts = dateStr.split('/');
+  return parseInt(parts[0]) + parseInt(parts[1]) * 100;
+}
+
+function getRangeAcumulado(startStr, endStr) {
+  var startNum = parseDateNumeric(startStr);
+  var endNum = parseDateNumeric(endStr);
+  var sum = {};
+  EMPRESAS.forEach(function(emp) {
+    sum[emp.id] = { monitor: 0, prenota: 0, robo: 0, total: 0 };
+    var c = getCompany(emp.id);
+    if (c && c.responsaveis) {
+      c.responsaveis.forEach(function(p) { sum[emp.id][p.id] = { monitor: 0, prenota: 0, robo: 0, total: 0 }; });
+    }
+  });
+  var reg = DATA_REGISTRY[2026];
+  for (var mk in reg) {
+    var mData = reg[mk];
+    for (var wn in mData.weeks) {
+      var week = mData.weeks[wn];
+      for (var dk in week.calendar.dias) {
+        var dateNum = parseDateNumeric(week.calendar.dias[dk].display);
+        if (dateNum >= startNum && dateNum <= endNum) {
+          var dayData = week.data[dk];
+          EMPRESAS.forEach(function(emp) {
+            var dd = dayData[emp.id];
+            if (dd) {
+              sum[emp.id].monitor += dd.monitor;
+              sum[emp.id].prenota += dd.prenota;
+              sum[emp.id].robo += dd.robo;
+              sum[emp.id].total += dd.total;
+              var c = getCompany(emp.id);
+              if (c && c.responsaveis) {
+                c.responsaveis.forEach(function(p) {
+                  if (dd[p.id]) {
+                    sum[emp.id][p.id].monitor += dd[p.id].monitor || 0;
+                    sum[emp.id][p.id].prenota += dd[p.id].prenota || 0;
+                    sum[emp.id][p.id].robo += dd[p.id].robo || 0;
+                    sum[emp.id][p.id].total += dd[p.id].total || 0;
+                  }
+                });
+              }
+            }
+          });
+        }
+      }
+    }
+  }
+  return sum;
+}
+
+function getMaasPersonMetrics(dados, personId) {
+  var data = getDadosMaasPorPessoa(dados, personId);
+  return {
+    total: data.total,
+    monitor: data.monitor,
+    prenota: data.prenota,
+    robo: data.robo,
+    eficiencia: data.monitor > 0 ? ((data.robo / data.monitor) * 100).toFixed(1) : 0,
+    pctPrenota: data.total > 0 ? ((data.prenota / data.total) * 100).toFixed(1) : 0
+  };
 }

@@ -1,46 +1,3 @@
-function atualizarDateStatsCards() {
-  var totals = {};
-  DAY_KEYS.forEach(function(d) { totals[d] = getValorDiaContexto(state.dadosPorData, d, state.paginaAtual); });
-  var totalGeral = Object.values(totals).reduce(function(a, b) { return a + b; }, 0);
-  var media = Math.round(totalGeral / 5);
-  var cal = getActiveWeekData()?.calendar;
-  if (!cal) return;
-
-  var orderedDays = [
-    { key: 'd1', nome: 'Segunda-feira' },
-    { key: 'd2', nome: 'Terça-feira' },
-    { key: 'd3', nome: 'Quarta-feira' },
-    { key: 'd4', nome: 'Quinta-feira' },
-    { key: 'd5', nome: 'Sexta-feira' }
-  ];
-
-  var html = '';
-  orderedDays.forEach(function(day, idx) {
-    var val = totals[day.key];
-    var prevVal = idx > 0 ? totals[orderedDays[idx - 1].key] : val;
-    var diff = val - prevVal;
-    var diffClass = diff >= 0 ? 'positive' : 'negative';
-    var diffArrow = diff >= 0 ? '\u2191' : '\u2193';
-    html +=
-      '<div class="date-stat-card ' + (state.dataAtual === day.key ? 'active-day' : '') + '" onclick="changeData(\'' + day.key + '\')">' +
-        '<div class="date-stat-label">' + day.nome + '</div>' +
-        '<div class="date-stat-value">' + val + '</div>' +
-        '<div class="date-stat-total">notas (' + cal.dias[day.key].display + ')</div>' +
-        (idx > 0 ? '<div class="date-stat-diff ' + diffClass + '">' + diffArrow + ' ' + Math.abs(diff) + ' vs ' + orderedDays[idx - 1].nome.slice(0, 3) + '</div>' : '') +
-      '</div>';
-  });
-
-  html +=
-    '<div class="date-stat-card ' + (state.dataAtual === 'acumulado' ? 'active-day' : '') + '" onclick="changeData(\'acumulado\')">' +
-      '<div class="date-stat-label">Total Acumulado</div>' +
-      '<div class="date-stat-value">' + totalGeral + '</div>' +
-      '<div class="date-stat-total">notas (5 dias)</div>' +
-      '<div class="date-stat-diff positive">m\u00e9dia: ' + media + '/dia</div>' +
-    '</div>';
-
-  document.getElementById('date-stats-cards').innerHTML = html;
-}
-
 function atualizarCardsGerais() {
   if (!state.dados) return;
   var totais = getTotaisGeral(state.dados);
@@ -62,11 +19,46 @@ function atualizarCardsEmpresa(emp, containerId, nome) {
   var pctMonitor = total > 0 ? (d.monitor / total * 100).toFixed(1) : 0;
   var pctPrenota = total > 0 ? (d.prenota / total * 100).toFixed(1) : 0;
   var pctRoboMonitor = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) : 0;
+  var c = getCompany(emp);
+  var respText = formatResponsaveis(c);
   document.getElementById(containerId).innerHTML =
-    '<div class="card"><div class="card-accent" style="background:#1B1F5E"></div><div class="card-title">Total ' + nome + '</div><div class="card-value">' + total + '</div><div class="card-sub">Monitor + Pr\u00e9-nota</div></div>' +
+    '<div class="card"><div class="card-accent" style="background:#1B1F5E"></div><div class="card-title">Total ' + nome + '</div><div class="card-value">' + total + '</div><div class="card-sub">' + respText + '</div></div>' +
     '<div class="card"><div class="card-accent" style="background:#2E7D32"></div><div class="card-title">Monitor</div><div class="card-value">' + d.monitor + '</div><div class="card-badge" style="background:#E8F5E9;color:#2E7D32">' + pctMonitor + '%</div></div>' +
     '<div class="card"><div class="card-accent" style="background:#ED6C02"></div><div class="card-title">Pr\u00e9-nota</div><div class="card-value">' + d.prenota + '</div><div class="card-badge" style="background:#FFF3E0;color:#ED6C02">' + pctPrenota + '%</div></div>' +
     '<div class="card"><div class="card-accent" style="background:#FF6B35"></div><div class="card-title">Rob\u00f4</div><div class="card-value">' + d.robo + '</div><div class="card-badge" style="background:#FFF0EB;color:#FF6B35">' + pctRoboMonitor + '% do Monitor</div></div>';
+}
+
+function atualizarCardsMaas() {
+  if (!state.dados || !state.dados['maas']) return;
+  var personId = getMaasPersona();
+  var d = state.dados['maas'];
+
+  if (personId === 'all') {
+    atualizarCardsEmpresa('maas', 'maas-cards', 'MAAS');
+    atualizarPersonMetrics(d);
+  } else {
+    var personData = getDadosMaasPorPessoa(state.dados, personId);
+    var p = getCompany('maas');
+    var person = p.responsaveis.find(function(r) { return r.id === personId; }) || p.responsaveis[0];
+    var pctMonitor = personData.total > 0 ? (personData.monitor / personData.total * 100).toFixed(1) : 0;
+    var pctPrenota = personData.total > 0 ? (personData.prenota / personData.total * 100).toFixed(1) : 0;
+    var pctRoboMonitor = personData.monitor > 0 ? ((personData.robo / personData.monitor) * 100).toFixed(1) : 0;
+    document.getElementById('maas-cards').innerHTML =
+      '<div class="card"><div class="card-accent" style="background:' + person.cor + '"></div><div class="card-title">Total ' + person.nome + '</div><div class="card-value">' + personData.total + '</div><div class="card-sub">Monitor + Pr\u00e9-nota</div></div>' +
+      '<div class="card"><div class="card-accent" style="background:#2E7D32"></div><div class="card-title">Monitor</div><div class="card-value">' + personData.monitor + '</div><div class="card-badge" style="background:#E8F5E9;color:#2E7D32">' + pctMonitor + '%</div></div>' +
+      '<div class="card"><div class="card-accent" style="background:#ED6C02"></div><div class="card-title">Pr\u00e9-nota</div><div class="card-value">' + personData.prenota + '</div><div class="card-badge" style="background:#FFF3E0;color:#ED6C02">' + pctPrenota + '%</div></div>' +
+      '<div class="card"><div class="card-accent" style="background:#FF6B35"></div><div class="card-title">Rob\u00f4</div><div class="card-value">' + personData.robo + '</div><div class="card-badge" style="background:#FFF0EB;color:#FF6B35">' + pctRoboMonitor + '% do Monitor</div></div>';
+    atualizarPersonMetrics(personData);
+  }
+}
+
+function atualizarPersonMetrics(d) {
+  var eficiencia = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) : 0;
+  var pctPrenota = d.total > 0 ? ((d.prenota / d.total) * 100).toFixed(1) : 0;
+  document.getElementById('maas-person-metrics').innerHTML =
+    '<div class="person-metric pm-navy"><div class="pm-label">Volume Total</div><div class="pm-value">' + d.total + '</div><div class="pm-sub">notas recebidas</div></div>' +
+    '<div class="person-metric pm-green"><div class="pm-label">Efici\u00eancia do Rob\u00f4</div><div class="pm-value">' + eficiencia + '%</div><div class="pm-sub">' + d.robo + ' de ' + d.monitor + ' monitor</div></div>' +
+    '<div class="person-metric pm-orange"><div class="pm-label">Pr\u00e9-nota</div><div class="pm-value">' + pctPrenota + '%</div><div class="pm-sub">' + d.prenota + ' de ' + d.total + ' total</div></div>';
 }
 
 function atualizarTabelaConsolidada() {
@@ -136,7 +128,7 @@ function atualizarTabelaEmpresa(emp, containerId, nome) {
   var pctNaoEscriturado = total > 0 ? (naoEscriturado / total * 100).toFixed(1) : 0;
   var pctPrenota = total > 0 ? (d.prenota / total * 100).toFixed(1) : 0;
   document.getElementById(containerId).innerHTML =
-    '<h3>Tabela — ' + nome + '</h3>' +
+    '<h3>Tabela \u2014 ' + nome + '</h3>' +
     '<table><thead><tr><th>Composi\u00e7\u00e3o</th><th class="num">Quantidade</th><th class="num">% do total</th></tr></thead>' +
     '<tbody>' +
       '<tr><td>Escriturado pelo rob\u00f4</td><td class="num">' + d.robo + '</td><td class="num">' + pctRobo + '%</td></tr>' +

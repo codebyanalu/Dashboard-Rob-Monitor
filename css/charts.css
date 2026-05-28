@@ -1,6 +1,6 @@
 .panel .js-plotly-plot,
 .panel .plot-container {
-  margin: -8px;
+  margin: 0;
 }
 
 .panel .plotly .main-svg {

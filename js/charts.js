@@ -151,3 +151,121 @@ function atualizarGraficosEmpresa(emp, barId, pieId) {
     hoverlabel: { bgcolor: '#1E293B', font: { family: 'Inter, sans-serif', size: 11, color: '#fff' }, bordercolor: '#1E293B' }
   }, { displayModeBar: false, responsive: true });
 }
+
+function atualizarGraficosMaas() {
+  if (!state.dados || !state.dados['maas']) return;
+  var personId = getMaasPersona();
+
+  if (personId === 'all') {
+    atualizarGraficosEmpresa('maas', 'maas_bar', 'maas_pie');
+  } else {
+    var personData = getDadosMaasPorPessoa(state.dados, personId);
+    var p = getCompany('maas');
+    var person = p.responsaveis.find(function(r) { return r.id === personId; }) || p.responsaveis[0];
+    var maxVal = Math.max(personData.monitor, personData.prenota, personData.robo, 1);
+
+    Plotly.newPlot('maas_bar', [{
+      x: ['Monitor', 'Pré-nota', 'Robô'],
+      y: [personData.monitor, personData.prenota, personData.robo],
+      type: 'bar',
+      marker: {
+        color: [person.cor, '#ED6C02', '#FF6B35'],
+        line: { color: '#ffffff', width: 1 }
+      },
+      text: [personData.monitor, personData.prenota, personData.robo],
+      textposition: 'outside',
+      textfont: { family: 'Inter, sans-serif', size: 11, color: '#334155' },
+      hovertemplate: '%{y} notas<extra>%{x}</extra>',
+      cliponaxis: false
+    }], Object.assign(barLayout(24, maxVal), {
+      bargap: 0.4
+    }), { displayModeBar: false, responsive: true });
+
+    var naoEscriturado = personData.monitor - personData.robo;
+    var labels = [], values = [], colors = [];
+    if (personData.robo > 0) { labels.push('Escriturado pelo robô'); values.push(personData.robo); colors.push('#FF6B35'); }
+    if (naoEscriturado > 0) { labels.push('Não escrituradas'); values.push(naoEscriturado); colors.push(person.cor); }
+    if (personData.prenota > 0) { labels.push('Pré-nota'); values.push(personData.prenota); colors.push('#ED6C02'); }
+    if (labels.length === 0) { labels.push('Sem dados'); values.push(1); colors.push('#D1D5DB'); }
+
+    Plotly.newPlot('maas_pie', [{
+      labels: labels, values: values, type: 'pie',
+      textinfo: 'label+percent',
+      textfont: { family: 'Inter, sans-serif', size: 10, color: '#334155' },
+      marker: {
+        colors: colors,
+        line: { color: '#ffffff', width: 2 }
+      },
+      hole: 0.45,
+      hovertemplate: '%{label}: %{value} notas (%{percent})<extra></extra>',
+      sort: false,
+      direction: 'clockwise',
+      rotation: 90
+    }], {
+      margin: { t: 8, l: 8, r: 8, b: 50 },
+      showlegend: true,
+      legend: { orientation: 'h', y: -0.18, font: { family: 'Inter, sans-serif', size: 10, color: '#64748B' } },
+      font: CHART_FONT,
+      paper_bgcolor: CHART_BG,
+      hoverlabel: { bgcolor: '#1E293B', font: { family: 'Inter, sans-serif', size: 11, color: '#fff' }, bordercolor: '#1E293B' }
+    }, { displayModeBar: false, responsive: true });
+  }
+
+  atualizarGraficosMaasComparativo();
+}
+
+function atualizarGraficosMaasComparativo() {
+  if (!state.dados || !state.dados['maas']) return;
+  var p = getCompany('maas');
+  var person1 = getDadosMaasPorPessoa(state.dados, 'responsavel1');
+  var person2 = getDadosMaasPorPessoa(state.dados, 'responsavel2');
+  var maxVal = Math.max(person1.monitor, person1.prenota, person1.robo, person2.monitor, person2.prenota, person2.robo, 1);
+
+  Plotly.newPlot('maas_person_bar', [
+    {
+      x: ['Monitor', 'Pré-nota', 'Robô'],
+      y: [person1.monitor, person1.prenota, person1.robo],
+      name: p.responsaveis[0].nome,
+      type: 'bar',
+      marker: { color: p.responsaveis[0].cor, line: { color: '#ffffff', width: 1 } },
+      hovertemplate: '%{y}<extra>' + p.responsaveis[0].nome + '</extra>'
+    },
+    {
+      x: ['Monitor', 'Pré-nota', 'Robô'],
+      y: [person2.monitor, person2.prenota, person2.robo],
+      name: p.responsaveis[1].nome,
+      type: 'bar',
+      marker: { color: p.responsaveis[1].cor, line: { color: '#ffffff', width: 1 } },
+      hovertemplate: '%{y}<extra>' + p.responsaveis[1].nome + '</extra>'
+    }
+  ], Object.assign(barLayout(14, maxVal), {
+    barmode: 'group',
+    showlegend: true,
+    legend: { orientation: 'h', y: 1.12, font: { family: 'Inter, sans-serif', size: 10, color: '#64748B' } },
+    bargroupgap: 0.25
+  }), { displayModeBar: false, responsive: true });
+
+  Plotly.newPlot('maas_person_pie', [{
+    labels: [p.responsaveis[0].nome, p.responsaveis[1].nome],
+    values: [person1.total, person2.total],
+    type: 'pie',
+    textinfo: 'label+percent',
+    textfont: { family: 'Inter, sans-serif', size: 10, color: '#334155' },
+    marker: {
+      colors: [p.responsaveis[0].cor, p.responsaveis[1].cor],
+      line: { color: '#ffffff', width: 2 }
+    },
+    hole: 0.45,
+    hovertemplate: '%{label}: %{value} notas (%{percent})<extra></extra>',
+    sort: false,
+    direction: 'clockwise',
+    rotation: 90
+  }], {
+    margin: { t: 8, l: 8, r: 8, b: 50 },
+    showlegend: true,
+    legend: { orientation: 'h', y: -0.18, font: { family: 'Inter, sans-serif', size: 10, color: '#64748B' } },
+    font: CHART_FONT,
+    paper_bgcolor: CHART_BG,
+    hoverlabel: { bgcolor: '#1E293B', font: { family: 'Inter, sans-serif', size: 11, color: '#fff' }, bordercolor: '#1E293B' }
+  }, { displayModeBar: false, responsive: true });
+}

@@ -12,11 +12,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/design-system.css?v=14">
-  <link rel="stylesheet" href="css/layout.css?v=14">
-  <link rel="stylesheet" href="css/components.css?v=14">
-  <link rel="stylesheet" href="css/charts.css?v=14">
-  <link rel="stylesheet" href="css/print.css?v=14">
+  <link rel="stylesheet" href="css/design-system.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/charts.css">
+  <link rel="stylesheet" href="css/print.css">
 
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -41,60 +41,29 @@
     </div>
 
     <div class="sidebar-filters">
-
       <div class="filter-group">
         <div class="filter-label">Ano</div>
-        <div class="filter-row" id="year-selector">
-          <button class="filter-btn active" data-year="2026" onclick="switchYear(2026)">2026</button>
-          <!-- Add more years here if needed -->
+        <div class="filter-row">
+          <span class="filter-static">2026</span>
         </div>
       </div>
 
       <div class="filter-group">
-        <div class="filter-label">Mês</div>
-        <div class="filter-row" id="month-selector">
-          <button class="filter-btn" data-month="may" onclick="switchMonth('may')">Mai</button>
-          <button class="filter-btn" data-month="jun" onclick="switchMonth('jun')">Jun</button>
-          <button class="filter-btn" data-month="jul" onclick="switchMonth('jul')">Jul</button>
-          <button class="filter-btn" data-month="aug" onclick="switchMonth('aug')">Ago</button>
-          <button class="filter-btn" data-month="sep" onclick="switchMonth('sep')">Set</button>
-          <button class="filter-btn" data-month="oct" onclick="switchMonth('oct')">Out</button>
-          <button class="filter-btn" data-month="nov" onclick="switchMonth('nov')">Nov</button>
-          <button class="filter-btn" data-month="dec" onclick="switchMonth('dec')">Dez</button>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <div class="filter-label">Calendário</div>
+        <div class="filter-label">Período</div>
         <button class="cal-trigger" onclick="toggleCalModal()">
-          <span id="cal-trigger-label">📅 Selecionar data</span>
+          <span id="cal-trigger-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Selecionar per\u00edodo
+          </span>
           <span class="cal-trigger-arrow">▾</span>
         </button>
-        <div id="db-active-range" class="filter-date">Período: —</div>
-      </div>
-      <div id="cal-modal-overlay" class="cal-modal-overlay" onclick="closeCalModal()">
-        <div class="cal-modal" onclick="event.stopPropagation()">
-          <div class="cal-modal-header">
-            <button class="cal-nav-btn" onclick="modalPrevMonth()">◀</button>
-            <span class="cal-modal-title" id="cal-modal-title">Maio 2026</span>
-            <button class="cal-nav-btn" onclick="modalNextMonth()">▶</button>
-          </div>
-          <table class="cal-modal-table">
-            <thead><tr>
-              <th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th>
-            </tr></thead>
-            <tbody id="cal-modal-body"></tbody>
-          </table>
-          <div class="cal-modal-footer">
-            <span class="cal-modal-info" id="cal-modal-info">Clique em um dia para visualizar</span>
-          </div>
-        </div>
-      </div>
 
+      </div>
     </div>
 
     <nav class="sidebar-nav">
       <div class="nav-label">Navegação</div>
+
       <div class="nav-item active" onclick="showPage('geral',this)">
         <div class="nav-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -130,6 +99,7 @@
     <div class="sidebar-footer">
       <span>GCON SIAN</span>
       <span>Dados operacionais</span>
+      <span>v2026.1</span>
     </div>
   </aside>
 
@@ -142,7 +112,7 @@
         </div>
       </div>
       <div class="topbar-right">
-        <button class="btn-primary btn-success" onclick="exportExcel()">
+        <button class="btn-primary btn-success" onclick="exportExcel()" title="Exportar para Excel">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="9" y1="3" x2="9" y2="21"></line>
@@ -152,7 +122,7 @@
           </svg>
           <span>Exportar Excel</span>
         </button>
-        <button class="btn-primary" onclick="exportPDF()">
+        <button class="btn-primary" onclick="exportPDF()" title="Exportar para PDF">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
@@ -167,8 +137,7 @@
 
     <div class="content">
 
-      <div class="date-stats-cards" id="date-stats-cards"></div>
-
+      <!-- Visão Geral -->
       <section id="geral" class="page active">
         <div class="cards">
           <div class="card">
@@ -215,17 +184,19 @@
           <div id="g_group" style="height:280px"></div>
         </div>
 
-        <div class="panel" style="margin-bottom:20px">
-          <h3>Ranking de Empresas</h3>
-          <div id="ranking-list"></div>
-        </div>
-
-        <div class="panel">
-          <h3>Tabela Consolidada</h3>
-          <div id="tabela-consolidada"></div>
+        <div class="grid2" style="margin-bottom:18px">
+          <div class="panel">
+            <h3>Ranking de Empresas</h3>
+            <div id="ranking-list"></div>
+          </div>
+          <div class="panel">
+            <h3>Tabela Consolidada</h3>
+            <div id="tabela-consolidada"></div>
+          </div>
         </div>
       </section>
 
+      <!-- HP -->
       <section id="hp" class="page">
         <div class="cards" id="hp-cards"></div>
         <div class="insight" id="insight-hp"></div>
@@ -243,6 +214,7 @@
         <div class="panel" id="tabela-hp"></div>
       </section>
 
+      <!-- URBI Recanto -->
       <section id="urbi_recanto" class="page">
         <div class="cards" id="rec-cards"></div>
         <div class="insight" id="insight-rec"></div>
@@ -260,6 +232,7 @@
         <div class="panel" id="tabela-rec"></div>
       </section>
 
+      <!-- URBI Samambaia -->
       <section id="urbi_samambaia" class="page">
         <div class="cards" id="sam-cards"></div>
         <div class="insight" id="insight-sam"></div>
@@ -277,9 +250,18 @@
         <div class="panel" id="tabela-sam"></div>
       </section>
 
+      <!-- MAAS -->
       <section id="maas" class="page">
+        <!-- Seletor de Pessoa (gerado dinamicamente) -->
+        <div class="person-selector" id="maas-person-selector"></div>
+
         <div class="cards" id="maas-cards"></div>
+
+        <!-- Métricas por Pessoa (MAAS) -->
+        <div class="person-metrics" id="maas-person-metrics"></div>
+
         <div class="insight" id="insight-maas"></div>
+
         <div class="grid2">
           <div class="panel">
             <h3>Indicadores MAAS</h3>
@@ -290,6 +272,19 @@
             <div id="maas_pie" style="height:260px"></div>
           </div>
         </div>
+
+        <!-- Gráficos comparativos por pessoa (MAAS) -->
+        <div class="grid2" style="margin-bottom:18px">
+          <div class="panel">
+            <h3>Comparativo por Pessoa</h3>
+            <div id="maas_person_bar" style="height:260px"></div>
+          </div>
+          <div class="panel">
+            <h3>Volume por Pessoa</h3>
+            <div id="maas_person_pie" style="height:260px"></div>
+          </div>
+        </div>
+
         <div class="panel" id="maas-progress" style="margin-bottom:20px"></div>
         <div class="panel" id="tabela-maas"></div>
       </section>
@@ -297,63 +292,108 @@
     </div>
   </div>
 
+  <!-- CALENDAR MODAL -->
+  <div id="cal-modal-overlay" class="cal-modal-overlay" onclick="closeCalModal()">
+    <div class="cal-modal" onclick="event.stopPropagation()">
+      <div class="cal-modal-header">
+        <button class="cal-nav-btn" onclick="modalPrevMonth()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <span class="cal-modal-title" id="cal-modal-title">Maio 2026</span>
+        <button class="cal-nav-btn" onclick="modalNextMonth()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+
+      <!-- Presets de Período -->
+      <div class="calendar-period-selector">
+        <div class="period-presets">
+          <button class="period-btn active" data-period="day" onclick="selectPeriodPreset('day')">Hoje</button>
+          <button class="period-btn" data-period="last7" onclick="selectPeriodPreset('last7')">Últimos 7 Dias</button>
+          <button class="period-btn" data-period="month" onclick="selectPeriodPreset('month')">Mês Atual</button>
+          <button class="period-btn" data-period="custom" onclick="selectPeriodPreset('custom')">Personalizado</button>
+        </div>
+        <div class="period-custom" id="period-custom-range">
+          <label>De:</label>
+          <input type="date" id="period-start-date">
+          <label>Até:</label>
+          <input type="date" id="period-end-date">
+          <button class="btn-primary btn-sm" onclick="applyCustomPeriod()">Aplicar</button>
+        </div>
+        <div class="period-info" id="period-info">Clique em dois dias para definir o per\u00edodo</div>
+      </div>
+
+      <table class="cal-modal-table">
+        <thead><tr>
+          <th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th>
+        </tr></thead>
+        <tbody id="cal-modal-body"></tbody>
+      </table>
+
+      <div class="cal-modal-footer">
+        <span class="cal-modal-info" id="cal-modal-info">Clique em um dia para visualizar</span>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
-  <script src="config/colors.js?v=12"></script>
-  <script src="config/constants.js?v=12"></script>
-  <script src="data/2026/may/week-1.js?v=12"></script>
-  <script src="data/2026/may/week-2.js?v=12"></script>
-  <script src="data/2026/may/week-3.js?v=12"></script>
-  <script src="data/2026/may/week-4.js?v=12"></script>
-  <script src="data/2026/jun/week-5.js?v=12"></script>
-  <script src="data/2026/jun/week-6.js?v=12"></script>
-  <script src="data/2026/jun/week-7.js?v=12"></script>
-  <script src="data/2026/jun/week-8.js?v=12"></script>
-  <script src="data/2026/jul/week-9.js?v=12"></script>
-  <script src="data/2026/jul/week-10.js?v=12"></script>
-  <script src="data/2026/jul/week-11.js?v=12"></script>
-  <script src="data/2026/jul/week-12.js?v=12"></script>
-  <script src="data/2026/jul/week-13.js?v=12"></script>
-  <script src="data/2026/aug/week-14.js?v=12"></script>
-  <script src="data/2026/aug/week-15.js?v=12"></script>
-  <script src="data/2026/aug/week-16.js?v=12"></script>
-  <script src="data/2026/aug/week-17.js?v=12"></script>
-  <script src="data/2026/sep/week-18.js?v=12"></script>
-  <script src="data/2026/sep/week-19.js?v=12"></script>
-  <script src="data/2026/sep/week-20.js?v=12"></script>
-  <script src="data/2026/sep/week-21.js?v=12"></script>
-  <script src="data/2026/oct/week-22.js?v=12"></script>
-  <script src="data/2026/oct/week-23.js?v=12"></script>
-  <script src="data/2026/oct/week-24.js?v=12"></script>
-  <script src="data/2026/oct/week-25.js?v=12"></script>
-  <script src="data/2026/nov/week-26.js?v=12"></script>
-  <script src="data/2026/nov/week-27.js?v=12"></script>
-  <script src="data/2026/nov/week-28.js?v=12"></script>
-  <script src="data/2026/nov/week-29.js?v=12"></script>
-  <script src="data/2026/dec/week-30.js?v=12"></script>
-  <script src="data/2026/dec/week-31.js?v=12"></script>
-  <script src="data/2026/dec/week-32.js?v=12"></script>
-  <script src="data/2026/dec/week-33.js?v=12"></script>
-  <script src="data/2026/dec/week-34.js?v=12"></script>
-  <script src="data/2026/may/index.js?v=12"></script>
-  <script src="data/2026/jun/index.js?v=12"></script>
-  <script src="data/2026/jul/index.js?v=12"></script>
-  <script src="data/2026/aug/index.js?v=12"></script>
-  <script src="data/2026/sep/index.js?v=12"></script>
-  <script src="data/2026/oct/index.js?v=12"></script>
-  <script src="data/2026/nov/index.js?v=12"></script>
-  <script src="data/2026/dec/index.js?v=12"></script>
-  <script src="data/index.js?v=12"></script>
-  <script src="services/storage.js?v=12"></script>
-  <script src="services/calculations.js?v=12"></script>
-  <script src="transformers/metrics.js?v=12"></script>
-  <script src="js/state.js?v=12"></script>
-  <script src="js/charts.js?v=13"></script>
-  <script src="js/components.js?v=12"></script>
-  <script src="js/insights.js?v=12"></script>
-  <script src="js/export.js?v=12"></script>
-  <script src="js/utils.js?v=12"></script>
-  <script src="js/calendar.js?v=12"></script>
-  <script src="js/main.js?v=12"></script>
+  <script src="config/colors.js"></script>
+  <script src="config/constants.js"></script>
+  <script src="data/2026/may/week-1.js"></script>
+  <script src="data/2026/may/week-2.js"></script>
+  <script src="data/2026/may/week-3.js"></script>
+  <script src="data/2026/may/week-4.js"></script>
+  <script src="data/2026/jun/week-5.js"></script>
+  <script src="data/2026/jun/week-6.js"></script>
+  <script src="data/2026/jun/week-7.js"></script>
+  <script src="data/2026/jun/week-8.js"></script>
+  <script src="data/2026/jul/week-9.js"></script>
+  <script src="data/2026/jul/week-10.js"></script>
+  <script src="data/2026/jul/week-11.js"></script>
+  <script src="data/2026/jul/week-12.js"></script>
+  <script src="data/2026/jul/week-13.js"></script>
+  <script src="data/2026/aug/week-14.js"></script>
+  <script src="data/2026/aug/week-15.js"></script>
+  <script src="data/2026/aug/week-16.js"></script>
+  <script src="data/2026/aug/week-17.js"></script>
+  <script src="data/2026/sep/week-18.js"></script>
+  <script src="data/2026/sep/week-19.js"></script>
+  <script src="data/2026/sep/week-20.js"></script>
+  <script src="data/2026/sep/week-21.js"></script>
+  <script src="data/2026/oct/week-22.js"></script>
+  <script src="data/2026/oct/week-23.js"></script>
+  <script src="data/2026/oct/week-24.js"></script>
+  <script src="data/2026/oct/week-25.js"></script>
+  <script src="data/2026/nov/week-26.js"></script>
+  <script src="data/2026/nov/week-27.js"></script>
+  <script src="data/2026/nov/week-28.js"></script>
+  <script src="data/2026/nov/week-29.js"></script>
+  <script src="data/2026/dec/week-30.js"></script>
+  <script src="data/2026/dec/week-31.js"></script>
+  <script src="data/2026/dec/week-32.js"></script>
+  <script src="data/2026/dec/week-33.js"></script>
+  <script src="data/2026/dec/week-34.js"></script>
+  <script src="data/2026/may/index.js"></script>
+  <script src="data/2026/jun/index.js"></script>
+  <script src="data/2026/jul/index.js"></script>
+  <script src="data/2026/aug/index.js"></script>
+  <script src="data/2026/sep/index.js"></script>
+  <script src="data/2026/oct/index.js"></script>
+  <script src="data/2026/nov/index.js"></script>
+  <script src="data/2026/dec/index.js"></script>
+  <script src="data/index.js"></script>
+  <script src="data/companies.js"></script>
+  <script src="services/storage.js"></script>
+  <script src="services/calculations.js"></script>
+  <script src="transformers/metrics.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/insights.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

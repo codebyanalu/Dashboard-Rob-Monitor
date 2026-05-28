@@ -1,10 +1,11 @@
 function getPeriodoStr() {
-  if (state.dataAtual === 'acumulado') return 'no Total Acumulado';
-  var cal = getActiveWeekData()?.calendar;
-  if (!cal) return '';
-  var dayInfo = cal.dias[state.dataAtual];
-  var dayNames = { d1: 'na Segunda-feira', d2: 'na Ter\u00e7a-feira', d3: 'na Quarta-feira', d4: 'na Quinta-feira', d5: 'na Sexta-feira' };
-  return (dayNames[state.dataAtual] || '') + (dayInfo?.display ? ' (' + dayInfo.display + ')' : '');
+  if (periodRange.start && periodRange.end) {
+    var s = pad(periodRange.start.day) + '/' + pad(periodRange.start.month);
+    var e = pad(periodRange.end.day) + '/' + pad(periodRange.end.month);
+    if (s === e) return 'em ' + s;
+    return 'de ' + s + ' a ' + e;
+  }
+  return '';
 }
 
 function atualizarInsightGeral() {
@@ -36,6 +37,13 @@ function atualizarInsightGeral() {
   document.getElementById('insight-geral').innerHTML = insightStr;
 }
 
+function formatResponsaveis(c) {
+  if (!c || !c.responsaveis) return '';
+  if (c.responsaveis.length === 1) return ' (Resp.: ' + c.responsaveis[0].nome + ')';
+  var names = c.responsaveis.map(function(p) { return p.nome; });
+  return ' (Resps.: ' + names.join(' e ') + ')';
+}
+
 function atualizarInsightEmpresa(emp, containerId, nome) {
   if (!state.dados || !state.dados[emp]) return;
   var d = state.dados[emp];
@@ -49,7 +57,9 @@ function atualizarInsightEmpresa(emp, containerId, nome) {
     return;
   }
 
-  var text = '<strong>' + nome + '</strong> registrou <strong>' + total + '</strong> notas ' + periodoStr + '. ';
+  var c = getCompany(emp);
+  var respText = formatResponsaveis(c);
+  var text = '<strong>' + nome + '</strong> registrou <strong>' + total + '</strong> notas ' + periodoStr + respText + '. ';
   if (d.monitor > 0) {
     text += 'Rob\u00f4 escriturou ' + d.robo + ' de ' + d.monitor + ' notas do Monitor (' + pctRoboMonitor + '% de efici\u00eancia). ';
   }
@@ -57,4 +67,47 @@ function atualizarInsightEmpresa(emp, containerId, nome) {
     text += 'Pr\u00e9-nota: ' + d.prenota + ' notas (' + pctPrenota + '% do volume).';
   }
   document.getElementById(containerId).innerHTML = '<strong>Insight ' + nome + ':</strong> ' + text;
+}
+
+function atualizarInsightMaas() {
+  if (!state.dados || !state.dados['maas']) return;
+  var d = state.dados['maas'];
+  var personId = getMaasPersona();
+  var total = d.total;
+  var periodoStr = getPeriodoStr();
+  var nome = 'MAAS';
+
+  if (total === 0) {
+    document.getElementById('insight-maas').innerHTML = '<strong>Insight ' + nome + ':</strong> Nenhuma movimenta\u00e7\u00e3o registrada ' + periodoStr + '.';
+    return;
+  }
+
+  var c = getCompany('maas');
+  if (personId === 'all') {
+    var respText = formatResponsaveis(c);
+    var parts = c.responsaveis.map(function(p) {
+      var pd = getDadosMaasPorPessoa(state.dados, p.id);
+      return p.nome + ': ' + pd.total + ' notas';
+    });
+    var text = '<strong>' + nome + '</strong> registrou <strong>' + total + '</strong> notas ' + periodoStr + respText + '. ';
+    text += parts.join(' | ') + '. ';
+    if (d.monitor > 0) {
+      var pctRoboMonitor = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) : 0;
+      text += 'Rob\u00f4: ' + d.robo + '/' + d.monitor + ' (' + pctRoboMonitor + '% efici\u00eancia).';
+    }
+    document.getElementById('insight-maas').innerHTML = '<strong>Insight ' + nome + ':</strong> ' + text;
+  } else {
+    var personData = getDadosMaasPorPessoa(state.dados, personId);
+    var person = c.responsaveis.find(function(r) { return r.id === personId; }) || c.responsaveis[0];
+    var pctRoboMonitor = personData.monitor > 0 ? ((personData.robo / personData.monitor) * 100).toFixed(1) : 0;
+    var text = '<strong>' + person.nome + '</strong> (' + nome + ') registrou <strong>' + personData.total + '</strong> notas ' + periodoStr + '. ';
+    if (personData.monitor > 0) {
+      text += 'Rob\u00f4 escriturou ' + personData.robo + ' de ' + personData.monitor + ' notas do Monitor (' + pctRoboMonitor + '% de efici\u00eancia). ';
+    }
+    if (personData.prenota > 0) {
+      var pctPrenota = personData.total > 0 ? ((personData.prenota / personData.total) * 100).toFixed(1) : 0;
+      text += 'Pr\u00e9-nota: ' + personData.prenota + ' notas (' + pctPrenota + '% do volume).';
+    }
+    document.getElementById('insight-maas').innerHTML = '<strong>Insight ' + nome + ' (' + person.nome + '):</strong> ' + text;
+  }
 }

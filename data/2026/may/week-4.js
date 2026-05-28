@@ -8,7 +8,7 @@ var CALENDAR4 = {
   fim: '29/05',
   dias: {
     d1: { label: 'Segunda-feira', display: '25/05' },
-    d2: { label: 'Terça-feira', display: '26/05' },
+    d2: { label: 'Ter�a-feira', display: '26/05' },
     d3: { label: 'Quarta-feira', display: '27/05' },
     d4: { label: 'Quinta-feira', display: '28/05' },
     d5: { label: 'Sexta-feira', display: '29/05' }
@@ -20,30 +20,30 @@ var DATA4 = {
     hp: { monitor: 29, prenota: 8, robo: 24, total: 37 },
     urbi_recanto: { monitor: 11, prenota: 12, robo: 11, total: 23 },
     urbi_samambaia: { monitor: 8, prenota: 18, robo: 8, total: 26 },
-    maas: { monitor: 18, prenota: 7, robo: 12, total: 25 }
+    maas: { monitor: 18, prenota: 7, robo: 12, total: 25, responsavel1: { monitor: 8, prenota: 1, robo: 3, total: 9 }, responsavel2: { monitor: 10, prenota: 6, robo: 9, total: 16 } }
   },
   d2: {
-    hp: { monitor: 18, prenota: 7, robo: 10, total: 25 },
+    hp: { monitor: 18, prenota: 5, robo: 10, total: 23 },
     urbi_recanto: { monitor: 8, prenota: 12, robo: 4, total: 20 },
     urbi_samambaia: { monitor: 13, prenota: 8, robo: 12, total: 21 },
-    maas: { monitor: 15, prenota: 13, robo: 12, total: 28 }
+    maas: { monitor: 15, prenota: 12, robo: 12, total: 27, responsavel1: { monitor: 5, prenota: 3, robo: 4, total: 8 }, responsavel2: { monitor: 10, prenota: 9, robo: 8, total: 19 } }
   },
   d3: {
-    hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    maas: { monitor: 0, prenota: 0, robo: 0, total: 0 }
+    hp: { monitor: 20, prenota: 6, robo: 14, total: 26 },
+    urbi_recanto: { monitor: 14, prenota: 3, robo: 13, total: 17 },
+    urbi_samambaia: { monitor: 9, prenota: 18, robo: 9, total: 27 },
+    maas: { monitor: 17, prenota: 9, robo: 11, total: 26, responsavel1: { monitor: 6, prenota: 1, robo: 3, total: 7 }, responsavel2: { monitor: 11, prenota: 8, robo: 8, total: 19 } }
   },
   d4: {
     hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
     urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
     urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    maas: { monitor: 0, prenota: 0, robo: 0, total: 0 }
+    maas: { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 }, responsavel2: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
   },
   d5: {
     hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
     urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
     urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    maas: { monitor: 0, prenota: 0, robo: 0, total: 0 }
+    maas: { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 }, responsavel2: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
   }
 };
