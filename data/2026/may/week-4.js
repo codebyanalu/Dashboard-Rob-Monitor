@@ -41,9 +41,9 @@ var DATA4 = {
     maas: { monitor: 15, prenota: 7, robo: 10, total: 22, responsavel1: { monitor: 7, prenota: 4, robo: 3, total: 11 }, responsavel2: { monitor: 8, prenota: 3, robo: 7, total: 11 } }
   },
   d5: {
-    hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    maas: { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 }, responsavel2: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
+    hp: { monitor: 24, prenota: 5, robo: 17, total: 29 },
+    urbi_recanto: { monitor: 9, prenota: 3, robo: 9, total: 12 },
+    urbi_samambaia: { monitor: 15, prenota: 6, robo: 13, total: 21 },
+    maas: { monitor: 13, prenota: 13, robo: 11, total: 26, responsavel1: { monitor: 0, prenota: 8, robo: 0, total: 8 }, responsavel2: { monitor: 13, prenota: 5, robo: 11, total: 18 } }
   }
 };
