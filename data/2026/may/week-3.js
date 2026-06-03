@@ -8,7 +8,7 @@ var CALENDAR3 = {
   fim: '22/05',
   dias: {
     d1: { label: 'Segunda-feira', display: '18/05' },
-    d2: { label: 'Ter�a-feira', display: '19/05' },
+    d2: { label: 'Terça-feira', display: '19/05' },
     d3: { label: 'Quarta-feira', display: '20/05' },
     d4: { label: 'Quinta-feira', display: '21/05' },
     d5: { label: 'Sexta-feira', display: '22/05' }

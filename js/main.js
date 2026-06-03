@@ -66,9 +66,7 @@ function renderPersonSelector(companyId) {
 window.switchMaasPerson = function(personId) {
   setMaasPersona(personId);
   renderPersonSelector('maas');
-renderPersonSelector('maas');
-
-atualizarDashboardCompleto();
+  atualizarDashboardCompleto();
   var c = getCompany('maas');
   var person = c.responsaveis.find(function(r) { return r.id === personId; });
   mostrarToast('Visualizando: ' + (person ? person.nome : 'Todos'));

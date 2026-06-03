@@ -89,10 +89,13 @@ function getRangeAcumulado(startStr, endStr) {
   });
   var reg = DATA_REGISTRY[2026];
   for (var mk in reg) {
+    if (!reg.hasOwnProperty(mk)) continue;
     var mData = reg[mk];
     for (var wn in mData.weeks) {
+      if (!mData.weeks.hasOwnProperty(wn)) continue;
       var week = mData.weeks[wn];
       for (var dk in week.calendar.dias) {
+        if (!week.calendar.dias.hasOwnProperty(dk)) continue;
         var dateNum = parseDateNumeric(week.calendar.dias[dk].display);
         if (dateNum >= startNum && dateNum <= endNum) {
           var dayData = week.data[dk];

@@ -11,15 +11,6 @@ var METRICAS = [
   { id: 'robo', nome: 'Robô', cor: '#FF6B35' }
 ];
 
-var DIAS_SEMANA = ['d1', 'd2', 'd3', 'd4', 'd5'];
-
-var DIAS_LABELS = {
-  d1: 'Segunda-feira',
-  d2: 'Terça-feira',
-  d3: 'Quarta-feira',
-  d4: 'Quinta-feira',
-  d5: 'Sexta-feira'
-};
 
 var PAGINAS = {
   geral: { titulo: 'Visão Geral', icone: 'dashboard' },

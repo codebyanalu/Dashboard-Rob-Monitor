@@ -114,8 +114,10 @@ function getFullYearData() {
     }
   });
   for (var mk in reg) {
+    if (!reg.hasOwnProperty(mk)) continue;
     var mData = reg[mk];
     for (var wn in mData.weeks) {
+      if (!mData.weeks.hasOwnProperty(wn)) continue;
       var week = mData.weeks[wn];
       for (var dk in week.data) {
         if (week.data.hasOwnProperty(dk)) {

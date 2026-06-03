@@ -179,7 +179,6 @@ function calendarDayClick(dateStr) {
 function applyRange(startStr, endStr) {
   var totalAcumulado = getRangeAcumulado(startStr, endStr);
   state.dados = totalAcumulado;
-  state.dadosPorData = null;
   var dayNames = { d1: 'Segunda-feira', d2: 'Ter\u00e7a-feira', d3: 'Quarta-feira', d4: 'Quinta-feira', d5: 'Sexta-feira' };
   document.getElementById('page-sub').textContent = 'Per\u00edodo: ' + startStr + ' a ' + endStr;
   var titles = { geral: 'Vis\u00e3o Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
