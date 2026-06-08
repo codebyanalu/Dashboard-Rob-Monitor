@@ -1,9 +1,8 @@
 function atualizarDashboardCompleto() {
   if (!state.dados) return;
-  atualizarCardsGerais();
+
+  atualizarKPICards();
   atualizarGraficosGerais();
-  atualizarTabelaConsolidada();
-  atualizarRanking();
   atualizarInsightGeral();
 
   atualizarCardsEmpresa('hp', 'hp-cards', 'HP');
@@ -34,27 +33,34 @@ function atualizarDashboardCompleto() {
 
 window.atualizarDashboardCompleto = atualizarDashboardCompleto;
 
-window.showPage = function(id, el) {
+function showPage(id, el) {
+  if (!id) return;
   setPaginaAtual(id);
   document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
-  document.getElementById(id).classList.add('active');
+  var pg = document.getElementById(id);
+  if (pg) pg.classList.add('active');
   if (el) el.classList.add('active');
-  var titles = { geral: 'Vis\u00e3o Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
-  document.getElementById('page-title').textContent = titles[id];
+  var titles = { geral: 'Visão Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
+  var subs = { geral: 'Resumo executivo da operação', hp: 'Detalhamento HP', urbi_recanto: 'Detalhamento URBI Recanto', urbi_samambaia: 'Detalhamento URBI Samambaia', maas: 'Detalhamento MAAS' };
+  document.getElementById('page-title').textContent = titles[id] || id;
   if (periodRange.start && periodRange.end) {
     var s = pad(periodRange.start.day) + '/' + pad(periodRange.start.month);
     var e = pad(periodRange.end.day) + '/' + pad(periodRange.end.month);
-    document.getElementById('page-sub').textContent = s === e ? 'Data: ' + s : 'Per\u00edodo: ' + s + ' a ' + e;
+    document.getElementById('page-sub').textContent = s === e ? 'Data: ' + s : 'Período: ' + s + ' a ' + e;
+  } else {
+    document.getElementById('page-sub').textContent = subs[id] || '';
   }
-};
+  if (id === 'maas') renderPersonSelector('maas');
+}
+window.showPage = showPage;
 
 function renderPersonSelector(companyId) {
   var container = document.getElementById('maas-person-selector');
   if (!container) return;
   var c = getCompany(companyId);
   if (!c || !c.responsaveis) return;
-  var html = '<span class="ps-label">Respons\u00e1vel:</span>';
+  var html = '<span class="ps-label">Responsável:</span>';
   html += '<button class="person-btn person-all' + (state.maasPersona === 'all' ? ' active' : '') + '" data-person="all" onclick="switchMaasPerson(\'all\')">Todos</button>';
   c.responsaveis.forEach(function(p) {
     var active = state.maasPersona === p.id ? ' active' : '';
