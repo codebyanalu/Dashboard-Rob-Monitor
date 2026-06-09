@@ -170,27 +170,28 @@ function getRangeDiario(startStr, endStr) {
 }
 
 function getPrevPeriodTotals(startStr, endStr) {
-  var sParts = startStr.split('/');
-  var eParts = endStr.split('/');
-  var startDate = new Date(2026, parseInt(sParts[1]) - 1, parseInt(sParts[0]));
-  var endDate = new Date(2026, parseInt(eParts[1]) - 1, parseInt(eParts[0]));
-  var diffDays = Math.round((endDate - startDate) / 86400000) + 1;
-  var prevEnd = new Date(startDate);
-  prevEnd.setDate(prevEnd.getDate() - 1);
-  var prevStart = new Date(prevEnd);
-  prevStart.setDate(prevStart.getDate() - diffDays + 1);
-  function fmt(d) { return (d.getDate() < 10 ? '0' : '') + d.getDate() + '/' + (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1); }
-  return getRangeAcumulado(fmt(prevStart), fmt(prevEnd));
+  function prevMonth(dateStr) {
+    var p = dateStr.split('/');
+    var m = parseInt(p[1]) - 1;
+    return p[0] + '/' + (m < 10 ? '0' : '') + m;
+  }
+  return getRangeAcumulado(prevMonth(startStr), prevMonth(endStr));
 }
 
-function getWeeklyTrends(maxWeeks) {
-  maxWeeks = maxWeeks || 12;
-  var weeks = [];
+function getWeeklyTrendsEmpresa(empresaId) {
   var reg = DATA_REGISTRY[2026];
   var monthNamesShort = { '5': 'mai', '6': 'jun', '7': 'jul', '8': 'ago', '9': 'set', '10': 'out', '11': 'nov', '12': 'dez' };
+
+  if (!periodRange.start || !periodRange.end) return [];
+
+  var startNum = periodRange.start.month * 100 + periodRange.start.day;
+  var endNum   = periodRange.end.month   * 100 + periodRange.end.day;
+
+  var weeks = [];
   var allMonths = Object.keys(reg).sort(function(a, b) {
     return reg[a].monthNum - reg[b].monthNum;
   });
+
   for (var mi = 0; mi < allMonths.length; mi++) {
     var mk = allMonths[mi];
     var mData = reg[mk];
@@ -198,24 +199,110 @@ function getWeeklyTrends(maxWeeks) {
     for (var wi = 0; wi < weekNums.length; wi++) {
       var wn = weekNums[wi];
       var week = mData.weeks[wn];
-      var monitor = 0, prenota = 0, robo = 0, hasData = false;
+      var dias = Object.values(week.calendar.dias);
+      if (dias.length === 0) continue;
+      var first = dias[0].display.split('/');
+      var last  = dias[dias.length - 1].display.split('/');
+      var weekStart = parseInt(first[1]) * 100 + parseInt(first[0]);
+      var weekEnd   = parseInt(last[1])  * 100 + parseInt(last[0]);
+      if (weekEnd < startNum || weekStart > endNum) continue;
+
+      var monitor = 0, prenota = 0, robo = 0;
       for (var dk in week.data) {
         if (!week.data.hasOwnProperty(dk)) continue;
-        EMPRESAS.forEach(function(emp) {
-          var dd = week.data[dk] ? week.data[dk][emp.id] : null;
-          if (dd && dd.total > 0) {
-            monitor += dd.monitor; prenota += dd.prenota; robo += dd.robo; hasData = true;
-          }
-        });
+        var dateNum = parseDateNumeric(week.calendar.dias[dk].display);
+        if (dateNum < startNum || dateNum > endNum) continue;
+        var dd = week.data[dk] ? week.data[dk][empresaId] : null;
+        if (dd) {
+          monitor += dd.monitor; prenota += dd.prenota; robo += dd.robo;
+        }
       }
-      if (hasData) {
-        var diasVals = Object.values(week.calendar.dias);
-        var label = diasVals.length > 0 ? diasVals[0].display : 'S' + wn;
-        var lp = label.split('/');
-        var labelFmt = lp[0] + '/' + (monthNamesShort[String(parseInt(lp[1]))] || lp[1]);
-        weeks.push({ weekNum: wn, label: labelFmt, monitor: monitor, prenota: prenota, robo: robo, total: monitor + prenota });
+      if (monitor === 0 && prenota === 0 && robo === 0) continue;
+      var label = dias[0].display;
+      var lp = label.split('/');
+      var labelFmt = lp[0] + '/' + (monthNamesShort[String(parseInt(lp[1]))] || lp[1]);
+      weeks.push({ weekNum: wn, label: labelFmt, monitor: monitor, prenota: prenota, robo: robo, total: monitor + prenota });
+    }
+  }
+  return weeks;
+}
+
+function getRangeDiarioEmpresa(empresaId, startStr, endStr) {
+  var startNum = parseDateNumeric(startStr);
+  var endNum = parseDateNumeric(endStr);
+  var days = [];
+  var reg = DATA_REGISTRY[2026];
+  for (var mk in reg) {
+    if (!reg.hasOwnProperty(mk)) continue;
+    var mData = reg[mk];
+    for (var wn in mData.weeks) {
+      if (!mData.weeks.hasOwnProperty(wn)) continue;
+      var week = mData.weeks[wn];
+      for (var dk in week.calendar.dias) {
+        if (!week.calendar.dias.hasOwnProperty(dk)) continue;
+        var dateStr = week.calendar.dias[dk].display;
+        var dateNum = parseDateNumeric(dateStr);
+        if (dateNum >= startNum && dateNum <= endNum) {
+          var dd = week.data[dk] ? week.data[dk][empresaId] : null;
+          var monitor = dd ? dd.monitor : 0;
+          var prenota = dd ? dd.prenota : 0;
+          var robo = dd ? dd.robo : 0;
+          days.push({ dateStr: dateStr, dateNum: dateNum, monitor: monitor, prenota: prenota, robo: robo, gap: Math.max(0, monitor - robo) });
+        }
       }
     }
   }
-  return weeks.slice(0, maxWeeks);
+  days.sort(function(a, b) { return a.dateNum - b.dateNum; });
+  return days;
+}
+
+function getWeeklyTrends() {
+  var reg = DATA_REGISTRY[2026];
+  var monthNamesShort = { '5': 'mai', '6': 'jun', '7': 'jul', '8': 'ago', '9': 'set', '10': 'out', '11': 'nov', '12': 'dez' };
+
+  if (!periodRange.start || !periodRange.end) return [];
+
+  var startNum = periodRange.start.month * 100 + periodRange.start.day;
+  var endNum   = periodRange.end.month   * 100 + periodRange.end.day;
+
+  var weeks = [];
+  var allMonths = Object.keys(reg).sort(function(a, b) {
+    return reg[a].monthNum - reg[b].monthNum;
+  });
+
+  for (var mi = 0; mi < allMonths.length; mi++) {
+    var mk = allMonths[mi];
+    var mData = reg[mk];
+    var weekNums = Object.keys(mData.weeks).map(Number).sort(function(a, b) { return a - b; });
+    for (var wi = 0; wi < weekNums.length; wi++) {
+      var wn = weekNums[wi];
+      var week = mData.weeks[wn];
+      var dias = Object.values(week.calendar.dias);
+      if (dias.length === 0) continue;
+      var first = dias[0].display.split('/');
+      var last  = dias[dias.length - 1].display.split('/');
+      var weekStart = parseInt(first[1]) * 100 + parseInt(first[0]);
+      var weekEnd   = parseInt(last[1])  * 100 + parseInt(last[0]);
+      if (weekEnd < startNum || weekStart > endNum) continue;
+
+      var monitor = 0, prenota = 0, robo = 0;
+      for (var dk in week.data) {
+        if (!week.data.hasOwnProperty(dk)) continue;
+        var dateNum = parseDateNumeric(week.calendar.dias[dk].display);
+        if (dateNum < startNum || dateNum > endNum) continue;
+        EMPRESAS.forEach(function(emp) {
+          var dd = week.data[dk] ? week.data[dk][emp.id] : null;
+          if (dd) {
+            monitor += dd.monitor; prenota += dd.prenota; robo += dd.robo;
+          }
+        });
+      }
+      if (monitor === 0 && prenota === 0 && robo === 0) continue;
+      var label = dias[0].display;
+      var lp = label.split('/');
+      var labelFmt = lp[0] + '/' + (monthNamesShort[String(parseInt(lp[1]))] || lp[1]);
+      weeks.push({ weekNum: wn, label: labelFmt, monitor: monitor, prenota: prenota, robo: robo, total: monitor + prenota });
+    }
+  }
+  return weeks;
 }

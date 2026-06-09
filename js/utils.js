@@ -1,3 +1,12 @@
+window.toggleDetail = function(btn) {
+  var content = btn.parentElement.querySelector('.detail-content');
+  if (!content) return;
+  var isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Ver menos' : btn.getAttribute('data-expanded-text') || 'Ver detalhes';
+  setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 100);
+};
+
 window.mostrarToast = function(msg) {
   var toast = document.getElementById('toast');
   if (!toast) return;

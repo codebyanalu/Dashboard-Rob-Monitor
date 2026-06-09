@@ -20,15 +20,20 @@ function atualizarDashboardCompleto() {
   atualizarProgressoEmpresa('urbi_samambaia', 'sam-progress');
   atualizarProgressoEmpresa('maas', 'maas-progress');
 
-  atualizarTabelaEmpresa('hp', 'tabela-hp', 'HP');
-  atualizarTabelaEmpresa('urbi_recanto', 'tabela-rec', 'URBI Recanto');
-  atualizarTabelaEmpresa('urbi_samambaia', 'tabela-sam', 'URBI Samambaia');
-  atualizarTabelaEmpresa('maas', 'tabela-maas', 'MAAS');
+  atualizarTabelaEmpresa('hp', 'hp-dist-detail', 'HP');
+  atualizarTabelaEmpresa('urbi_recanto', 'rec-dist-detail', 'URBI Recanto');
+  atualizarTabelaEmpresa('urbi_samambaia', 'sam-dist-detail', 'URBI Samambaia');
+  atualizarTabelaEmpresa('maas', 'maas-dist-detail', 'MAAS');
 
   atualizarInsightEmpresa('hp', 'insight-hp', 'HP');
   atualizarInsightEmpresa('urbi_recanto', 'insight-rec', 'URBI Recanto');
   atualizarInsightEmpresa('urbi_samambaia', 'insight-sam', 'URBI Samambaia');
   atualizarInsightMaas();
+
+  atualizarEmpresaExtra('hp', 'HP', '#1B1F5E');
+  atualizarEmpresaExtra('urbi_recanto', 'URBI Recanto', '#2E7D32');
+  atualizarEmpresaExtra('urbi_samambaia', 'URBI Samambaia', '#ED6C02');
+  atualizarEmpresaExtraMaas();
 }
 
 window.atualizarDashboardCompleto = atualizarDashboardCompleto;
@@ -41,8 +46,8 @@ function showPage(id, el) {
   var pg = document.getElementById(id);
   if (pg) pg.classList.add('active');
   if (el) el.classList.add('active');
-  var titles = { geral: 'Visão Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
-  var subs = { geral: 'Resumo executivo da operação', hp: 'Detalhamento HP', urbi_recanto: 'Detalhamento URBI Recanto', urbi_samambaia: 'Detalhamento URBI Samambaia', maas: 'Detalhamento MAAS' };
+  var titles = { geral: 'Visão Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS', alertas: 'Alertas', relatorios: 'Relatórios', configuracoes: 'Configurações' };
+  var subs = { geral: 'Resumo executivo da operação', hp: 'Detalhamento HP', urbi_recanto: 'Detalhamento URBI Recanto', urbi_samambaia: 'Detalhamento URBI Samambaia', maas: 'Detalhamento MAAS', alertas: 'Alertas inteligentes da operação', relatorios: 'Exportação e tabelas consolidadas', configuracoes: 'Preferências do dashboard' };
   document.getElementById('page-title').textContent = titles[id] || id;
   if (periodRange.start && periodRange.end) {
     var s = pad(periodRange.start.day) + '/' + pad(periodRange.start.month);
@@ -52,6 +57,8 @@ function showPage(id, el) {
     document.getElementById('page-sub').textContent = subs[id] || '';
   }
   if (id === 'maas') renderPersonSelector('maas');
+  if (id === 'relatorios') { atualizarTabelaConsolidada(); atualizarRanking(); }
+  if (id === 'alertas') { atualizarAlertas(); }
 }
 window.showPage = showPage;
 
@@ -73,10 +80,42 @@ window.switchMaasPerson = function(personId) {
   setMaasPersona(personId);
   renderPersonSelector('maas');
   atualizarDashboardCompleto();
+  populateConfigSelect();
   var c = getCompany('maas');
   var person = c.responsaveis.find(function(r) { return r.id === personId; });
   mostrarToast('Visualizando: ' + (person ? person.nome : 'Todos'));
 };
+
+/* ── CONFIG FUNCTIONS ── */
+function toggleSidebarPref(collapsed) {
+  if (collapsed) { document.body.classList.add('sidebar-collapsed'); saveSidebarState(true); }
+  else { document.body.classList.remove('sidebar-collapsed'); saveSidebarState(false); }
+}
+window.toggleSidebarPref = toggleSidebarPref;
+
+function setMaasPersonaPref(personId) {
+  setMaasPersona(personId);
+  renderPersonSelector('maas');
+  atualizarDashboardCompleto();
+  populateConfigSelect();
+  mostrarToast('Responsável padrão: ' + (personId === 'all' ? 'Todos' : personId));
+}
+
+window.setMaasPersonaPref = setMaasPersonaPref;
+
+function populateConfigSelect() {
+  var sel = document.getElementById('cfg-maas-persona');
+  if (!sel) return;
+  var c = getCompany('maas');
+  if (!c || !c.responsaveis) return;
+  sel.innerHTML = '<option value="all">Todos</option>';
+  c.responsaveis.forEach(function(p) {
+    var selected = state.maasPersona === p.id ? ' selected' : '';
+    sel.innerHTML += '<option value="' + p.id + '"' + selected + '>' + p.nome + '</option>';
+  });
+  var cb = document.getElementById('cfg-sidebar-collapsed');
+  if (cb) cb.checked = document.body.classList.contains('sidebar-collapsed');
+}
 
 if (loadSidebarState()) {
   document.body.classList.add('sidebar-collapsed');
@@ -84,22 +123,18 @@ if (loadSidebarState()) {
 
 buildDateLookup();
 
-var todayStr = getTodayDateStr();
-if (dateLookup[todayStr]) {
-  periodRange = { start: parseDateStr(todayStr), end: parseDateStr(todayStr) };
-  selectedDateStr = todayStr + ' - ' + todayStr;
-  state.dados = getRangeAcumulado(todayStr, todayStr);
+var targetStr = getYesterdayDateStr();
+if (!dateLookup[targetStr]) {
+  var keys = Object.keys(dateLookup);
+  targetStr = keys[keys.length - 1] || null;
+}
+if (targetStr) {
+  periodRange = { start: parseDateStr(targetStr), end: parseDateStr(targetStr) };
+  selectedDateStr = targetStr + ' - ' + targetStr;
+  state.dados = getRangeAcumulado(targetStr, targetStr);
   updateTriggerLabel();
-  document.getElementById('page-sub').textContent = 'Data: ' + todayStr;
-} else {
-  var firstDate = Object.keys(dateLookup)[0];
-  if (firstDate) {
-    periodRange = { start: parseDateStr(firstDate), end: parseDateStr(firstDate) };
-    selectedDateStr = firstDate + ' - ' + firstDate;
-    state.dados = getRangeAcumulado(firstDate, firstDate);
-    updateTriggerLabel();
-    document.getElementById('page-sub').textContent = 'Data: ' + firstDate;
-  }
+  document.getElementById('page-sub').textContent = 'Data: ' + targetStr;
 }
 
 atualizarDashboardCompleto();
+populateConfigSelect();

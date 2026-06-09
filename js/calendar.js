@@ -64,6 +64,7 @@ function updateTriggerLabel() {
 }
 
 function getTodayDateStr() { var d = new Date(); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1); }
+function getYesterdayDateStr() { var d = new Date(); d.setDate(d.getDate() - 1); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1); }
 
 function renderCalModalBody(monthKey) {
   var year = state.activeYear || 2026;
@@ -123,7 +124,9 @@ function openCalModal() {
   buildDateLookup();
   var overlay = document.getElementById('cal-modal-overlay');
   if (!overlay) return;
-  modalMonthKey = state.activeMonth || 'may';
+  var now = new Date();
+  var currentMonthNames = { 5:'may',6:'jun',7:'jul',8:'aug',9:'sep',10:'oct',11:'nov',12:'dec' };
+  modalMonthKey = currentMonthNames[now.getMonth() + 1] || 'may';
   rangeStartPending = null;
   renderCalModalBody(modalMonthKey);
   overlay.classList.add('open');

@@ -212,6 +212,151 @@ function buildExcelHtml() {
   return h;
 }
 
+/* ── XLSX PARSER: spreadsheet model ── */
+function parseXLSXtoState(rows) {
+  var EMP_MAP = [
+    { test: 'hp', id: 'hp' },
+    { test: 'urbirecanto', id: 'urbi_recanto' },
+    { test: 'urbisamambaia', id: 'urbi_samambaia' },
+    { test: 'maas', id: 'maas' }
+  ];
+  var result = {};
+  var empIds = ['hp', 'urbi_recanto', 'urbi_samambaia', 'maas'];
+  empIds.forEach(function(id) {
+    result[id] = { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 } };
+  });
+  result.maas.responsavel2 = { monitor: 0, prenota: 0, robo: 0, total: 0 };
+
+  var currentEmp = null, pendingCatKey = null;
+
+  function detectCompany(text) {
+    if (!text) return null;
+    var clean = text.toLowerCase().replace(/[-_\s]/g, '');
+    for (var i = 0; i < EMP_MAP.length; i++) {
+      if (clean.indexOf(EMP_MAP[i].test) !== -1) return EMP_MAP[i].id;
+    }
+    return null;
+  }
+
+  function detectCategory(text) {
+    if (!text) return null;
+    var t = text.toLowerCase();
+    if (t.indexOf('recebidas pelo monitor') !== -1) return 'monitor';
+    if (t.indexOf('pré-nota') !== -1 || t.indexOf('pre-nota') !== -1) return 'prenota';
+    if (t.indexOf('escrituradas pelo robô') !== -1 || t.indexOf('escrituradas pelo') !== -1) return 'robo';
+    if (t === 'total') return 'total';
+    return null;
+  }
+
+  function detectPerson(text, empId) {
+    if (!text) return null;
+    var t = text.toLowerCase().replace(/[\s.-]/g, '');
+    if (t.indexOf('davi') !== -1) return 'responsavel1';
+    if (t.indexOf('luiz') !== -1 || t.indexOf('luiiz') !== -1) return 'responsavel1';
+    if (t.indexOf('joao') !== -1 && empId === 'maas') return 'responsavel1';
+    if (t.indexOf('joao') !== -1) return 'responsavel1';
+    if (t.indexOf('elton') !== -1) return 'responsavel2';
+    if (t.indexOf('leite') !== -1) return 'responsavel1';
+    return null;
+  }
+
+  function extractNums(row, startIdx) {
+    var nums = [];
+    for (var i = startIdx; i < row.length; i++) {
+      var v = row[i];
+      if (v === undefined || v === null || v === '') continue;
+      var str = String(v).trim();
+      if (str === '' || str.toLowerCase() === 'side') continue;
+      var num = Number(v);
+      if (!isNaN(num)) nums.push(num);
+    }
+    return nums;
+  }
+
+  rows.forEach(function(r) {
+    if (!r || r.length < 2) return;
+    var c0 = String(r[0] || '').trim();
+    var c1 = String(r[1] || '').trim();
+    var c2 = String(r[2] || '').trim();
+
+    if (c0 === 'Descrição') {
+      pendingCatKey = null;
+      return;
+    }
+
+    var emp = detectCompany(c0 || c1);
+    if (emp) { currentEmp = emp; pendingCatKey = null; return; }
+
+    if (!currentEmp) return;
+
+    var cat = detectCategory(c1);
+    if (cat) {
+      pendingCatKey = cat;
+      var nums = extractNums(r, 2);
+      nums.forEach(function(v) { result[currentEmp][cat] += v; });
+      return;
+    }
+
+    var pKey = detectPerson(c0 || c1 || c2, currentEmp);
+    if (pKey && result[currentEmp][pKey] && pendingCatKey) {
+      var pNums = extractNums(r, 2);
+      pNums.forEach(function(v) { result[currentEmp][pKey][pendingCatKey] += v; });
+    }
+  });
+
+  empIds.forEach(function(emp) {
+    var d = result[emp];
+    d.total = d.monitor + d.prenota;
+    for (var pk in d) {
+      if (pk !== 'monitor' && pk !== 'prenota' && pk !== 'robo' && pk !== 'total') {
+        d[pk].total = d[pk].monitor + d[pk].prenota;
+      }
+    }
+  });
+  return result;
+}
+
+window.importDataFromFile = function(input) {
+  if (!input || !input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'json') {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (!data || typeof data !== 'object') { mostrarToast('JSON inválido'); return; }
+        state.dados = data;
+        atualizarDashboardCompleto();
+        mostrarToast('Dados importados de: ' + file.name);
+      } catch(err) {
+        mostrarToast('Erro ao ler JSON: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  } else if (ext === 'xlsx' || ext === 'xls') {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var wb = XLSX.read(e.target.result, { type: 'array' });
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        var data = parseXLSXtoState(rows);
+        if (!data) { mostrarToast('Não foi possível interpretar a planilha'); return; }
+        state.dados = data;
+        atualizarDashboardCompleto();
+        mostrarToast('Dados importados de: ' + file.name);
+      } catch(err) {
+        mostrarToast('Erro ao ler XLSX: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    mostrarToast('Formato não suportado. Use .json ou .xlsx');
+  }
+  input.value = '';
+};
 window.exportExcel = function() {
   if (!state.dados) { mostrarToast('Nenhum dado carregado'); return; }
 
