@@ -23,10 +23,10 @@ var DATA6 = {
     maas: { monitor: 19, prenota: 19, robo: 12, total: 38, responsavel1: { monitor: 8, prenota: 6, robo: 3, total: 14 }, responsavel2: { monitor: 11, prenota: 13, robo: 9, total: 24 } }
   },
   d2: {
-    hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    maas: { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 }, responsavel2: { monitor: 0, prenota: 0, robo: 0, total: 0 }}
+    hp: { monitor: 32, prenota: 9, robo: 24, total: 41 },
+    urbi_recanto: { monitor: 11, prenota: 1, robo: 10, total: 12 },
+    urbi_samambaia: { monitor: 11, prenota: 10, robo: 10, total: 21 },
+    maas: { monitor: 7, prenota: 17, robo: 4, total: 24, responsavel1: { monitor: 1, prenota: 6, robo: 0, total: 7 }, responsavel2: { monitor: 6, prenota: 11, robo: 4, total: 17 }}
   },
   d3: {
     hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
