@@ -1,3 +1,9 @@
+window.escapeHtml = function(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+};
+
 window.toggleDetail = function(btn) {
   var content = btn.parentElement.querySelector('.detail-content');
   if (!content) return;

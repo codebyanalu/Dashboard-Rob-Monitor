@@ -148,9 +148,9 @@ function atualizarStatusOperacao() {
   var leg = document.getElementById('status-legend');
   if (leg) {
     var items = [
-      { label: 'Robô (Escrituradas)', val: robo, color: '#FF6B35' },
+      { label: 'Robô (Escrituradas)', val: robo, color: '#059669' },
       { label: 'GAP (Pendentes)', val: gap, color: '#DC2626' },
-      { label: 'Pré-Nota', val: prenota, color: '#ED6C02' }
+      { label: 'Pré-Nota', val: prenota, color: '#7C3AED' }
     ];
     leg.innerHTML = items.map(function(it) {
       return '<div class="status-legend-item">' +
@@ -163,9 +163,9 @@ function atualizarStatusOperacao() {
   }
 
   var donutLabels = [], donutValues = [], donutColors = [];
-  if (robo > 0)    { donutLabels.push('Robô (Escrituradas)'); donutValues.push(robo);   donutColors.push('#FF6B35'); }
+  if (robo > 0)    { donutLabels.push('Robô (Escrituradas)'); donutValues.push(robo);   donutColors.push('#059669'); }
   if (gap > 0)     { donutLabels.push('GAP (Pendentes)');     donutValues.push(gap);    donutColors.push('#DC2626'); }
-  if (prenota > 0) { donutLabels.push('Pré-Nota');            donutValues.push(prenota); donutColors.push('#ED6C02'); }
+  if (prenota > 0) { donutLabels.push('Pré-Nota');            donutValues.push(prenota); donutColors.push('#7C3AED'); }
   if (donutLabels.length === 0) { donutLabels.push('Sem dados'); donutValues.push(1); donutColors.push('#D1D5DB'); }
 
   Plotly.newPlot('g_status_donut', [{
@@ -198,12 +198,10 @@ function atualizarPerformancePorEmpresa() {
   var container = document.getElementById('performance-empresas');
   if (!container) return;
 
-  var empresasDef = [
-    { id: 'maas',          nome: 'MAAS',          sigla: 'M',  cor: '#FF6B35' },
-    { id: 'hp',            nome: 'HP',            sigla: 'HP', cor: '#1B1F5E' },
-    { id: 'urbi_recanto',  nome: 'URBI Recanto',  sigla: 'UR', cor: '#2E7D32' },
-    { id: 'urbi_samambaia',nome: 'URBI Samambaia', sigla: 'US', cor: '#ED6C02' }
-  ];
+  var empresasDef = getEmpresasPermitidas().map(function(e) {
+    var c = getCompany(e.id);
+    return { id: e.id, nome: e.nome, sigla: c ? c.slug.toUpperCase().substring(0, 2) : e.short, cor: c ? c.cor : '#64748B' };
+  });
 
   var html = empresasDef.map(function(emp) {
     var d = state.dados[emp.id];
@@ -226,12 +224,10 @@ function atualizarTopPendencias() {
   var container = document.getElementById('top-pendencias');
   if (!container) return;
 
-  var empresasDef = [
-    { id: 'maas',          nome: 'MAAS',           cor: '#FF6B35' },
-    { id: 'hp',            nome: 'HP',             cor: '#1B1F5E' },
-    { id: 'urbi_recanto',  nome: 'URBI Recanto',   cor: '#2E7D32' },
-    { id: 'urbi_samambaia',nome: 'URBI Samambaia',  cor: '#ED6C02' }
-  ];
+  var empresasDef = getEmpresasPermitidas().map(function(e) {
+    var c = getCompany(e.id);
+    return { id: e.id, nome: e.nome, cor: c ? c.cor : '#64748B' };
+  });
 
   var items = empresasDef.map(function(emp) {
     var d = state.dados[emp.id];
@@ -290,12 +286,10 @@ function atualizarDestaques() {
   var container = document.getElementById('destaques-cards');
   if (!container) return;
 
-  var empresasDef = [
-    { id: 'maas',          nome: 'MAAS',           sigla: 'M',  cor: '#FF6B35', page: 'maas' },
-    { id: 'hp',            nome: 'HP',             sigla: 'HP', cor: '#1B1F5E', page: 'hp' },
-    { id: 'urbi_recanto',  nome: 'URBI Recanto',   sigla: 'UR', cor: '#2E7D32', page: 'urbi_recanto' },
-    { id: 'urbi_samambaia',nome: 'URBI Samambaia',  sigla: 'US', cor: '#ED6C02', page: 'urbi_samambaia' }
-  ];
+  var empresasDef = getEmpresasPermitidas().map(function(e) {
+    var c = getCompany(e.id);
+    return { id: e.id, nome: e.nome, sigla: (c ? c.slug.toUpperCase().substring(0, 2) : e.short), cor: c ? c.cor : '#64748B', page: e.id };
+  });
 
   var allEfic = empresasDef.map(function(emp) {
     var d = state.dados[emp.id];
@@ -338,12 +332,9 @@ function atualizarAlertas() {
   var container = document.getElementById('alertas-lista');
   if (!container) return;
 
-  var empresasDef = [
-    { id: 'maas', nome: 'MAAS' },
-    { id: 'hp', nome: 'HP' },
-    { id: 'urbi_recanto', nome: 'URBI Recanto' },
-    { id: 'urbi_samambaia', nome: 'URBI Samambaia' }
-  ];
+  var empresasDef = getEmpresasPermitidas().map(function(e) {
+    return { id: e.id, nome: e.nome };
+  });
 
   var alertas = [];
   var totais = getTotaisGeral(state.dados);
@@ -501,18 +492,18 @@ function atualizarPersonMetrics(d) {
 
 function atualizarTabelaConsolidada() {
   if (!state.dados) return;
-  var keys  = ['maas', 'hp', 'urbi_recanto', 'urbi_samambaia'];
-  var nomes = ['MAAS', 'HP', 'URBI Recanto', 'URBI Samambaia'];
+  var empresasPermitidas = getEmpresasPermitidas();
   var totais = getTotaisGeral(state.dados);
   var totalGeral = totais.geral;
 
   var html = '<thead><tr><th>Empresa</th><th class="num">Total</th><th class="num">Monitor</th><th class="num">Pré-nota</th><th class="num">Robô</th><th class="num">GAP</th><th class="num">Efic.%</th></tr></thead><tbody>';
-  keys.forEach(function(k, i) {
+  empresasPermitidas.forEach(function(emp) {
+    var k = emp.id;
     var d = state.dados[k];
     if (!d) return;
     var gap = Math.max(0, d.monitor - d.robo);
     var pctRoboStr = d.monitor > 0 ? ((d.robo / d.monitor) * 100).toFixed(1) + '%' : '—';
-    html += '<tr><td>' + nomes[i] + '</td><td class="num">' + d.total + '</td><td class="num">' + d.monitor + '</td><td class="num">' + d.prenota + '</td><td class="num">' + d.robo + '</td><td class="num">' + gap + '</td><td class="num">' + pctRoboStr + '</td></tr>';
+    html += '<tr><td>' + emp.nome + '</td><td class="num">' + d.total + '</td><td class="num">' + d.monitor + '</td><td class="num">' + d.prenota + '</td><td class="num">' + d.robo + '</td><td class="num">' + gap + '</td><td class="num">' + pctRoboStr + '</td></tr>';
   });
   html += '<tr class="table-total"><td>Total</td><td class="num">' + totalGeral + '</td><td class="num">' + totais.totalMonitor + '</td><td class="num">' + totais.totalPrenota + '</td><td class="num">' + totais.totalRobo + '</td><td class="num">' + Math.max(0, totais.totalMonitor - totais.totalRobo) + '</td><td class="num">—</td></tr>';
   html += '</tbody>';
@@ -521,7 +512,7 @@ function atualizarTabelaConsolidada() {
 
 function atualizarRanking() {
   if (!state.dados) return;
-  var ranking = getEmpresaRanking(state.dados);
+  var ranking = getEmpresaRanking(state.dados, getEmpresaIdsPermitidos());
   var html = ranking.map(function(r, idx) {
     var efic = r.monitor > 0 ? ((r.robo / r.monitor) * 100).toFixed(1) : 0;
     return '<div class="rank-item">' +
@@ -545,7 +536,7 @@ function atualizarProgressoEmpresa(emp, containerId) {
   document.getElementById(containerId).innerHTML =
     '<div class="prog-header">Distribuição (' + totalNotas + ' notas)</div>' +
     '<div class="prog-row"><span class="prog-label">Recebidas pelo Monitor</span><div class="prog-wrap"><div class="prog-fill" style="width:' + pctMonitor + '%;background:#2E7D32"></div></div><span class="prog-val">' + d.monitor + '</span><span class="prog-pct">' + pctMonitor + '%</span></div>' +
-    '<div class="prog-row"><span class="prog-label">Recebidas pela Pré-nota</span><div class="prog-wrap"><div class="prog-fill" style="width:' + pctPrenota + '%;background:#ED6C02"></div></div><span class="prog-val">' + d.prenota + '</span><span class="prog-pct">' + pctPrenota + '%</span></div>' +
+    '<div class="prog-row"><span class="prog-label">Recebidas pela Pré-nota</span><div class="prog-wrap"><div class="prog-fill" style="width:' + pctPrenota + '%;background:#7C3AED"></div></div><span class="prog-val">' + d.prenota + '</span><span class="prog-pct">' + pctPrenota + '%</span></div>' +
     '<div class="prog-row"><span class="prog-label">Escrituradas pelo robô</span><div class="prog-wrap"><div class="prog-fill" style="width:' + pctRobo + '%;background:#FF6B35"></div></div><span class="prog-val">' + d.robo + '</span><span class="prog-pct">' + pctRobo + '%</span></div>' +
     '<div class="prog-row"><span class="prog-label">GAP (não escrituradas)</span><div class="prog-wrap"><div class="prog-fill" style="width:' + pctGap + '%;background:#DC2626"></div></div><span class="prog-val">' + gap + '</span><span class="prog-pct">' + pctGap + '%</span></div>';
 }

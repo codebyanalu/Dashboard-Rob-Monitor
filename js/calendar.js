@@ -8,7 +8,9 @@ var periodRange = { start: null, end: null };
 var rangeStartPending = null;
 
 function buildDateLookup() {
-  var reg = DATA_REGISTRY[2026];
+  var reg = dataLoader.getAno(2026);
+  if (!reg) return;
+  dateLookup = {};
   for (var mk in reg) {
     var mData = reg[mk];
     for (var wn in mData.weeks) {
@@ -28,7 +30,9 @@ function getMonthData(monthKey, year) {
   year = year || 2026;
   var cacheKey = year + '-' + monthKey;
   if (monthDataCache[cacheKey]) return monthDataCache[cacheKey];
-  var monthNum = DATA_REGISTRY[year][monthKey].monthNum;
+  var reg = dataLoader.getAno(year);
+  if (!reg || !reg[monthKey]) return null;
+  var monthNum = reg[monthKey].monthNum;
   var firstDay = new Date(year, monthNum - 1, 1);
   var daysInMonth = new Date(year, monthNum, 0).getDate();
   var weeks = [];
@@ -67,7 +71,7 @@ function getTodayDateStr() { var d = new Date(); return pad(d.getDate()) + '/' +
 function getYesterdayDateStr() { var d = new Date(); d.setDate(d.getDate() - 1); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1); }
 
 function renderCalModalBody(monthKey) {
-  var year = state.activeYear || 2026;
+  var year = 2026;
   var mData = getMonthData(monthKey, year);
   var tbody = document.getElementById('cal-modal-body');
   var title = document.getElementById('cal-modal-title');
@@ -126,7 +130,9 @@ function openCalModal() {
   if (!overlay) return;
   var now = new Date();
   var currentMonthNames = { 5:'may',6:'jun',7:'jul',8:'aug',9:'sep',10:'oct',11:'nov',12:'dec' };
-  modalMonthKey = currentMonthNames[now.getMonth() + 1] || 'may';
+  if (!periodRange.start || modalMonthKey === 'may') {
+    modalMonthKey = currentMonthNames[now.getMonth() + 1] || 'may';
+  }
   rangeStartPending = null;
   renderCalModalBody(modalMonthKey);
   overlay.classList.add('open');
@@ -137,12 +143,18 @@ function openCalModal() {
   } else {
     document.getElementById('period-info').textContent = 'Clique em dois dias para definir o per\u00edodo';
   }
+  setTimeout(function() { document.addEventListener('keydown', calModalKeydown); }, 0);
+}
+
+function calModalKeydown(e) {
+  if (e.key === 'Escape') closeCalModal();
 }
 
 function closeCalModal() {
   var overlay = document.getElementById('cal-modal-overlay');
   if (overlay) overlay.classList.remove('open');
   rangeStartPending = null;
+  document.removeEventListener('keydown', calModalKeydown);
 }
 
 function modalPrevMonth() {
@@ -161,7 +173,14 @@ function calendarDayClick(dateStr) {
   if (!rangeStartPending) {
     rangeStartPending = dateStr;
     renderCalModalBody(modalMonthKey);
-    document.getElementById('period-info').textContent = 'In\u00edcio: ' + dateStr + ' \u2014 clique no dia final';
+    document.getElementById('period-info').innerHTML = '<span style="color:var(--navy);font-weight:600">In\u00edcio: ' + dateStr + '</span> \u2014 clique no dia final';
+    return;
+  }
+
+  if (dateStr === rangeStartPending) {
+    rangeStartPending = null;
+    renderCalModalBody(modalMonthKey);
+    document.getElementById('period-info').textContent = 'Clique em dois dias para definir o per\u00edodo';
     return;
   }
 
@@ -180,8 +199,8 @@ function calendarDayClick(dateStr) {
 }
 
 function applyRange(startStr, endStr) {
-  var totalAcumulado = getRangeAcumulado(startStr, endStr);
-  state.dados = totalAcumulado;
+  state.dadosCompletos = getRangeAcumulado(startStr, endStr);
+  filtrarDadosPorPermissao();
   var dayNames = { d1: 'Segunda-feira', d2: 'Ter\u00e7a-feira', d3: 'Quarta-feira', d4: 'Quinta-feira', d5: 'Sexta-feira' };
   document.getElementById('page-sub').textContent = 'Per\u00edodo: ' + startStr + ' a ' + endStr;
   var titles = { geral: 'Vis\u00e3o Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };

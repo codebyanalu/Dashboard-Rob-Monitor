@@ -33,8 +33,9 @@ var COLORS = {
 
 var CHART_COLORS = {
   monitor: '#2E7D32',
-  prenota: '#ED6C02',
-  robo: '#FF6B35',
+  prenota: '#7C3AED',
+  robo: '#059669',
+  gap: '#DC2626',
   naoEscriturado: '#1B1F5E',
   empresas: ['#FF6B35', '#1B1F5E', '#2E7D32', '#6B7280']
 };

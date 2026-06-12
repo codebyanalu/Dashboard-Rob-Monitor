@@ -87,7 +87,7 @@ function getRangeAcumulado(startStr, endStr) {
       c.responsaveis.forEach(function(p) { sum[emp.id][p.id] = { monitor: 0, prenota: 0, robo: 0, total: 0 }; });
     }
   });
-  var reg = DATA_REGISTRY[2026];
+  var reg = dataLoader.getAno(2026);
   for (var mk in reg) {
     if (!reg.hasOwnProperty(mk)) continue;
     var mData = reg[mk];
@@ -142,7 +142,10 @@ function getRangeDiario(startStr, endStr) {
   var startNum = parseDateNumeric(startStr);
   var endNum = parseDateNumeric(endStr);
   var days = [];
-  var reg = DATA_REGISTRY[2026];
+  var reg = dataLoader.getAno(2026);
+  var filterIds = (typeof getEmpresaIdsPermitidos === 'function' && getEmpresaIdsPermitidos().length > 0)
+    ? getEmpresaIdsPermitidos()
+    : EMPRESAS.map(function(e) { return e.id; });
   for (var mk in reg) {
     if (!reg.hasOwnProperty(mk)) continue;
     var mData = reg[mk];
@@ -156,8 +159,8 @@ function getRangeDiario(startStr, endStr) {
         if (dateNum >= startNum && dateNum <= endNum) {
           var dayData = week.data[dk];
           var monitor = 0, prenota = 0, robo = 0;
-          EMPRESAS.forEach(function(emp) {
-            var dd = dayData ? dayData[emp.id] : null;
+          filterIds.forEach(function(id) {
+            var dd = dayData ? dayData[id] : null;
             if (dd) { monitor += dd.monitor; prenota += dd.prenota; robo += dd.robo; }
           });
           days.push({ dateStr: dateStr, dateNum: dateNum, monitor: monitor, prenota: prenota, robo: robo, gap: Math.max(0, monitor - robo) });
@@ -179,7 +182,7 @@ function getPrevPeriodTotals(startStr, endStr) {
 }
 
 function getWeeklyTrendsEmpresa(empresaId) {
-  var reg = DATA_REGISTRY[2026];
+  var reg = dataLoader.getAno(2026);
   var monthNamesShort = { '5': 'mai', '6': 'jun', '7': 'jul', '8': 'ago', '9': 'set', '10': 'out', '11': 'nov', '12': 'dez' };
 
   if (!periodRange.start || !periodRange.end) return [];
@@ -231,7 +234,7 @@ function getRangeDiarioEmpresa(empresaId, startStr, endStr) {
   var startNum = parseDateNumeric(startStr);
   var endNum = parseDateNumeric(endStr);
   var days = [];
-  var reg = DATA_REGISTRY[2026];
+  var reg = dataLoader.getAno(2026);
   for (var mk in reg) {
     if (!reg.hasOwnProperty(mk)) continue;
     var mData = reg[mk];
@@ -257,13 +260,17 @@ function getRangeDiarioEmpresa(empresaId, startStr, endStr) {
 }
 
 function getWeeklyTrends() {
-  var reg = DATA_REGISTRY[2026];
+  var reg = dataLoader.getAno(2026);
   var monthNamesShort = { '5': 'mai', '6': 'jun', '7': 'jul', '8': 'ago', '9': 'set', '10': 'out', '11': 'nov', '12': 'dez' };
 
   if (!periodRange.start || !periodRange.end) return [];
 
   var startNum = periodRange.start.month * 100 + periodRange.start.day;
   var endNum   = periodRange.end.month   * 100 + periodRange.end.day;
+
+  var filterIds = (typeof getEmpresaIdsPermitidos === 'function' && getEmpresaIdsPermitidos().length > 0)
+    ? getEmpresaIdsPermitidos()
+    : EMPRESAS.map(function(e) { return e.id; });
 
   var weeks = [];
   var allMonths = Object.keys(reg).sort(function(a, b) {
@@ -290,8 +297,8 @@ function getWeeklyTrends() {
         if (!week.data.hasOwnProperty(dk)) continue;
         var dateNum = parseDateNumeric(week.calendar.dias[dk].display);
         if (dateNum < startNum || dateNum > endNum) continue;
-        EMPRESAS.forEach(function(emp) {
-          var dd = week.data[dk] ? week.data[dk][emp.id] : null;
+        filterIds.forEach(function(id) {
+          var dd = week.data[dk] ? week.data[dk][id] : null;
           if (dd) {
             monitor += dd.monitor; prenota += dd.prenota; robo += dd.robo;
           }

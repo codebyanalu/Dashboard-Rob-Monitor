@@ -29,16 +29,16 @@ var DATA6 = {
     maas: { monitor: 7, prenota: 17, robo: 4, total: 24, responsavel1: { monitor: 1, prenota: 6, robo: 0, total: 7 }, responsavel2: { monitor: 6, prenota: 11, robo: 4, total: 17 }}
   },
   d3: {
-    hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    maas: { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 }, responsavel2: { monitor: 0, prenota: 0, robo: 0, total: 0 }}
+    hp: { monitor: 22, prenota: 7, robo: 15, total: 29 },
+    urbi_recanto: { monitor: 6, prenota: 3, robo: 4, total: 9 },
+    urbi_samambaia: { monitor: 6, prenota: 4, robo: 6, total: 10 },
+    maas: { monitor: 15, prenota: 9, robo: 11, total: 24, responsavel1: { monitor: 6, prenota: 3, robo: 4, total: 9 }, responsavel2: { monitor: 9, prenota: 6, robo: 7, total: 15 }}
   },
   d4: {
-    hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    maas: { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 }, responsavel2: { monitor: 0, prenota: 0, robo: 0, total: 0 }}
+    hp: { monitor: 26, prenota: 3, robo: 17, total: 29 },
+    urbi_recanto: { monitor: 7, prenota: 4, robo: 4, total: 11 },
+    urbi_samambaia: { monitor: 11, prenota: 12, robo: 8, total: 23 },
+    maas: { monitor: 3, prenota: 16, robo: 2, total: 19, responsavel1: { monitor: 0, prenota: 7, robo: 0, total: 7 }, responsavel2: { monitor: 3, prenota: 9, robo: 2, total: 12 }}
   },
   d5: {
     hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },

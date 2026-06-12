@@ -150,7 +150,7 @@ function atualizarGraficosEmpresa(emp, barId, pieId) {
     x: ['Monitor', 'Pré-nota', 'Robô', 'GAP'],
     y: [d.monitor, d.prenota, d.robo, gap],
     type: 'bar',
-    marker: { color: ['#2E7D32', '#ED6C02', '#FF6B35', '#DC2626'], line: { color: '#ffffff', width: 1 } },
+    marker: { color: ['#2E7D32', '#7C3AED', '#FF6B35', '#DC2626'], line: { color: '#ffffff', width: 1 } },
     text: [d.monitor, d.prenota, d.robo, gap],
     textposition: 'outside',
     textfont: { family: 'Inter, sans-serif', size: 11, color: '#334155' },
@@ -161,7 +161,7 @@ function atualizarGraficosEmpresa(emp, barId, pieId) {
   var labels = [], values = [], colors = [];
   if (d.robo > 0)   { labels.push('Escriturado pelo robô'); values.push(d.robo);   colors.push('#FF6B35'); }
   if (gap > 0)      { labels.push('Pendentes (GAP)');       values.push(gap);       colors.push('#DC2626'); }
-  if (d.prenota > 0){ labels.push('Pré-nota');              values.push(d.prenota); colors.push('#ED6C02'); }
+  if (d.prenota > 0){ labels.push('Pré-nota');              values.push(d.prenota); colors.push('#7C3AED'); }
   if (labels.length === 0) { labels.push('Sem dados'); values.push(1); colors.push('#D1D5DB'); }
 
   Plotly.newPlot(pieId, [{
@@ -199,7 +199,7 @@ function atualizarGraficosMaas() {
       x: ['Monitor', 'Pré-nota', 'Robô', 'GAP'],
       y: [personData.monitor, personData.prenota, personData.robo, gap],
       type: 'bar',
-      marker: { color: [person.cor, '#ED6C02', '#FF6B35', '#DC2626'], line: { color: '#ffffff', width: 1 } },
+      marker: { color: [person.cor, '#7C3AED', '#FF6B35', '#DC2626'], line: { color: '#ffffff', width: 1 } },
       text: [personData.monitor, personData.prenota, personData.robo, gap],
       textposition: 'outside',
       textfont: { family: 'Inter, sans-serif', size: 11, color: '#334155' },
@@ -210,7 +210,7 @@ function atualizarGraficosMaas() {
     var labels = [], values = [], colors = [];
     if (personData.robo > 0)   { labels.push('Escriturado pelo robô'); values.push(personData.robo);   colors.push('#FF6B35'); }
     if (gap > 0)               { labels.push('Pendentes (GAP)');       values.push(gap);               colors.push('#DC2626'); }
-    if (personData.prenota > 0){ labels.push('Pré-nota');              values.push(personData.prenota); colors.push('#ED6C02'); }
+    if (personData.prenota > 0){ labels.push('Pré-nota');              values.push(personData.prenota); colors.push('#7C3AED'); }
     if (labels.length === 0)   { labels.push('Sem dados'); values.push(1); colors.push('#D1D5DB'); }
 
     Plotly.newPlot('maas_pie', [{

@@ -105,7 +105,8 @@ var _fullYearData = null;
 
 function getFullYearData() {
   if (_fullYearData) return _fullYearData;
-  var reg = DATA_REGISTRY[2026];
+  var reg = dataLoader && dataLoader.getAno(2026);
+  if (!reg) return null;
   var sum = {};
   COMPANIES.forEach(function(emp) {
     sum[emp.id] = { monitor: 0, prenota: 0, robo: 0, total: 0 };

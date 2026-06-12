@@ -11,6 +11,7 @@ var METRICAS = [
   { id: 'robo', nome: 'Robô', cor: '#FF6B35' }
 ];
 
+var DAY_KEYS = ['d1', 'd2', 'd3', 'd4', 'd5'];
 
 var PAGINAS = {
   geral: { titulo: 'Visão Geral', icone: 'dashboard' },
@@ -19,6 +20,25 @@ var PAGINAS = {
   urbi_samambaia: { titulo: 'URBI Samambaia', icone: 'location' },
   maas: { titulo: 'MAAS', icone: 'business' }
 };
+
+function getEmpresasPermitidas() {
+  if (!state.user || !state.isAuthenticated) return [];
+  if (state.user.allowedCompanies === 'all') return EMPRESAS;
+  return EMPRESAS.filter(function(e) {
+    return state.user.allowedCompanies.indexOf(e.id) !== -1;
+  });
+}
+
+function getEmpresaIdsPermitidos() {
+  var empresas = getEmpresasPermitidas();
+  return empresas.map(function(e) { return e.id; });
+}
+
+function isEmpresaPermitida(empresaId) {
+  if (!state.user || !state.isAuthenticated) return false;
+  if (state.user.allowedCompanies === 'all') return true;
+  return state.user.allowedCompanies.indexOf(empresaId) !== -1;
+}
 
 var PERIODOS = {
   S1: { inicio: '04/05', fim: '08/05' },

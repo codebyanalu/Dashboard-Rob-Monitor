@@ -1,3 +1,4 @@
+.hidden { display: none !important; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; }
 body {
@@ -743,6 +744,10 @@ table .table-total td {
 .cm-range-start .cm-day-inner { background: var(--navy); color: var(--white); font-weight: 600; border-radius: 50% 0 0 50%; }
 .cm-range-end .cm-day-inner { background: var(--navy); color: var(--white); font-weight: 600; border-radius: 0 50% 50% 0; }
 .cm-range-start.cm-range-end .cm-day-inner { border-radius: 50%; }
+.cm-pending .cm-day-inner { background: var(--gray-200); color: var(--gray-700); font-weight: 600; box-shadow: 0 0 0 2px var(--navy); }
+.cm-range-hover .cm-day-inner { background: var(--gray-100); color: var(--gray-700); border-radius: 0; }
+.cm-hover-start .cm-day-inner { border-radius: 50% 0 0 50%; }
+.cm-hover-end .cm-day-inner { border-radius: 0 50% 50% 0; }
 .cm-disabled .cm-day-inner { color: var(--gray-300); cursor: default; }
 .cm-weekend .cm-day-inner { color: var(--gray-300); }
 .cal-modal-footer { margin-top: 10px; text-align: center; min-height: 18px; }

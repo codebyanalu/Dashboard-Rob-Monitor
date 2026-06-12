@@ -327,7 +327,8 @@ window.importDataFromFile = function(input) {
       try {
         var data = JSON.parse(e.target.result);
         if (!data || typeof data !== 'object') { mostrarToast('JSON inválido'); return; }
-        state.dados = data;
+        state.dadosCompletos = data;
+        filtrarDadosPorPermissao();
         atualizarDashboardCompleto();
         mostrarToast('Dados importados de: ' + file.name);
       } catch(err) {
@@ -344,7 +345,8 @@ window.importDataFromFile = function(input) {
         var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
         var data = parseXLSXtoState(rows);
         if (!data) { mostrarToast('Não foi possível interpretar a planilha'); return; }
-        state.dados = data;
+        state.dadosCompletos = data;
+        filtrarDadosPorPermissao();
         atualizarDashboardCompleto();
         mostrarToast('Dados importados de: ' + file.name);
       } catch(err) {

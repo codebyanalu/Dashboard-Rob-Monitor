@@ -1,7 +1,10 @@
 var state = {
   paginaAtual: 'geral',
   dados: null,
-  maasPersona: 'all'
+  dadosCompletos: null,
+  maasPersona: 'all',
+  user: null,
+  isAuthenticated: false
 };
 
 function setPaginaAtual(p) { state.paginaAtual = p; }

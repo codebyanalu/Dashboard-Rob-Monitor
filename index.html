@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Robô Notas Fiscais — BI Operacional</title>
+  <title>Robô Notas Fiscais</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,6 +19,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
 
@@ -50,19 +51,19 @@
 
     <div class="nav-label">Empresas</div>
 
-    <div class="nav-item" onclick="showPage('maas',this)">
+    <div class="nav-item" data-company="maas" onclick="showPage('maas',this)">
       <div class="nav-company-icon" style="background:#FF6B35">M</div>
       <span class="nav-text">MAAS</span>
     </div>
-    <div class="nav-item" onclick="showPage('hp',this)">
+    <div class="nav-item" data-company="hp" onclick="showPage('hp',this)">
       <div class="nav-company-icon" style="background:#1B1F5E">HP</div>
       <span class="nav-text">HP</span>
     </div>
-    <div class="nav-item" onclick="showPage('urbi_recanto',this)">
+    <div class="nav-item" data-company="urbi_recanto" onclick="showPage('urbi_recanto',this)">
       <div class="nav-company-icon" style="background:#2E7D32">UR</div>
       <span class="nav-text">URBI Recanto</span>
     </div>
-    <div class="nav-item" onclick="showPage('urbi_samambaia',this)">
+    <div class="nav-item" data-company="urbi_samambaia" onclick="showPage('urbi_samambaia',this)">
       <div class="nav-company-icon" style="background:#ED6C02">US</div>
       <span class="nav-text">URBI Samambaia</span>
     </div>
@@ -662,57 +663,46 @@
 
 <div id="toast" class="toast"></div>
 
+<!-- ═══════════════════════════ LOGIN OVERLAY ═══════════════════════════ -->
+<div id="login-overlay" class="login-overlay">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo-marca">ROBÔ <span>NOTAS FISCAIS</span></div>
+      <div class="logo-sub">BI Operacional</div>
+      <h2>Acessar Dashboard</h2>
+      <p>Insira suas credenciais para continuar</p>
+    </div>
+    <form class="login-form" id="login-form" onsubmit="return loginFormSubmit(event)">
+      <div class="login-error" id="login-error"></div>
+      <div class="login-field">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" placeholder="seu@email.com.br" autocomplete="email" required>
+      </div>
+      <div class="login-field">
+        <label for="login-password">Senha</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="login-btn" id="login-btn">
+        Entrar
+      </button>
+    </form>
+    <div class="login-footer">
+      Robô Notas Fiscais — BI Operacional
+    </div>
+  </div>
+</div>
+
 <!-- DATA FILES -->
 <script src="config/colors.js"></script>
 <script src="config/constants.js"></script>
-<script src="data/2026/may/week-1.js"></script>
-<script src="data/2026/may/week-2.js"></script>
-<script src="data/2026/may/week-3.js"></script>
-<script src="data/2026/may/week-4.js"></script>
-<script src="data/2026/jun/week-5.js"></script>
-<script src="data/2026/jun/week-6.js"></script>
-<script src="data/2026/jun/week-7.js"></script>
-<script src="data/2026/jun/week-8.js"></script>
-<script src="data/2026/jul/week-9.js"></script>
-<script src="data/2026/jul/week-10.js"></script>
-<script src="data/2026/jul/week-11.js"></script>
-<script src="data/2026/jul/week-12.js"></script>
-<script src="data/2026/jul/week-13.js"></script>
-<script src="data/2026/aug/week-14.js"></script>
-<script src="data/2026/aug/week-15.js"></script>
-<script src="data/2026/aug/week-16.js"></script>
-<script src="data/2026/aug/week-17.js"></script>
-<script src="data/2026/sep/week-18.js"></script>
-<script src="data/2026/sep/week-19.js"></script>
-<script src="data/2026/sep/week-20.js"></script>
-<script src="data/2026/sep/week-21.js"></script>
-<script src="data/2026/oct/week-22.js"></script>
-<script src="data/2026/oct/week-23.js"></script>
-<script src="data/2026/oct/week-24.js"></script>
-<script src="data/2026/oct/week-25.js"></script>
-<script src="data/2026/nov/week-26.js"></script>
-<script src="data/2026/nov/week-27.js"></script>
-<script src="data/2026/nov/week-28.js"></script>
-<script src="data/2026/nov/week-29.js"></script>
-<script src="data/2026/dec/week-30.js"></script>
-<script src="data/2026/dec/week-31.js"></script>
-<script src="data/2026/dec/week-32.js"></script>
-<script src="data/2026/dec/week-33.js"></script>
-<script src="data/2026/dec/week-34.js"></script>
-<script src="data/2026/may/index.js"></script>
-<script src="data/2026/jun/index.js"></script>
-<script src="data/2026/jul/index.js"></script>
-<script src="data/2026/aug/index.js"></script>
-<script src="data/2026/sep/index.js"></script>
-<script src="data/2026/oct/index.js"></script>
-<script src="data/2026/nov/index.js"></script>
-<script src="data/2026/dec/index.js"></script>
-<script src="data/index.js"></script>
+<script src="config/users-permissions.js"></script>
 <script src="data/companies.js"></script>
 <script src="services/storage.js"></script>
+<script src="services/data-loader.js"></script>
 <script src="services/calculations.js"></script>
 <script src="transformers/metrics.js"></script>
 <script src="js/state.js"></script>
+<script src="services/auth.js"></script>
 <script src="js/charts.js"></script>
 <script src="js/components.js"></script>
 <script src="js/insights.js"></script>

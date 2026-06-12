@@ -8,8 +8,11 @@ function getRoboEfficiencyPct(monitor, robo) {
   return monitor > 0 ? ((robo / monitor) * 100).toFixed(1) : 0;
 }
 
-function getEmpresaRanking(dados) {
-  return EMPRESAS.map(function(emp) {
+function getEmpresaRanking(dados, filtroIds) {
+  var empresas = filtroIds
+    ? EMPRESAS.filter(function(e) { return filtroIds.indexOf(e.id) !== -1; })
+    : EMPRESAS;
+  return empresas.map(function(emp) {
     return {
       id: emp.id,
       nome: emp.nome,
