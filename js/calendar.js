@@ -61,7 +61,8 @@ function updateTriggerLabel() {
   if (periodRange.start && periodRange.end) {
     var s = pad(periodRange.start.day) + '/' + pad(periodRange.start.month);
     var e = pad(periodRange.end.day) + '/' + pad(periodRange.end.month);
-    el.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>' + s + ' \u2013 ' + e;
+    var label = s === e ? s : s + ' \u2013 ' + e;
+    el.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>' + label;
   } else {
     el.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Selecionar per\u00edodo';
   }
@@ -78,6 +79,8 @@ function renderCalModalBody(monthKey) {
   if (!tbody || !title) return;
   title.textContent = monthNames[monthKey] + ' ' + year;
 
+  var currentDateStr = periodRange.start ? pad(periodRange.start.day) + '/' + pad(periodRange.start.month) : null;
+
   var html = '';
   for (var wi = 0; wi < mData.weeks.length; wi++) {
     var week = mData.weeks[wi];
@@ -89,26 +92,12 @@ function renderCalModalBody(monthKey) {
       var lookup = dateLookup[dateStr];
       var hasData = !!lookup;
       var isWeekend = (di >= 5);
-      var inRange = false, isRangeStart = false, isRangeEnd = false, isPending = false;
-
-      if (hasData && periodRange.start && periodRange.end) {
-        var dNum = dateToNum(dateStr);
-        var sNum = dateToNum(pad(periodRange.start.day) + '/' + pad(periodRange.start.month));
-        var eNum = dateToNum(pad(periodRange.end.day) + '/' + pad(periodRange.end.month));
-        if (dNum >= sNum && dNum <= eNum) inRange = true;
-        if (dNum === sNum) isRangeStart = true;
-        if (dNum === eNum) isRangeEnd = true;
-      }
-
-      if (rangeStartPending && dateStr === rangeStartPending) isPending = true;
+      var isSelected = currentDateStr && dateStr === currentDateStr;
 
       var classNames = 'cm-day';
       if (isWeekend) classNames += ' cm-weekend';
       if (!hasData) classNames += ' cm-disabled';
-      if (isPending) classNames += ' cm-pending';
-      if (inRange && !isRangeStart && !isRangeEnd) classNames += ' cm-in-range';
-      if (isRangeStart) classNames += ' cm-range-start';
-      if (isRangeEnd) classNames += ' cm-range-end';
+      if (isSelected) classNames += ' cm-selected';
       if (lookup && lookup.monthKey === monthKey && !isWeekend) classNames += ' cm-clickable';
       var onClick = (hasData && !isWeekend) ? 'onclick="calendarDayClick(\'' + dateStr + '\')"' : '';
       html += '<td class="' + classNames + '" ' + onClick + '><div class="cm-day-inner">' + dayNum + '</div></td>';
@@ -128,10 +117,10 @@ function openCalModal() {
   buildDateLookup();
   var overlay = document.getElementById('cal-modal-overlay');
   if (!overlay) return;
-  var now = new Date();
+  var ref = getYesterday();
   var currentMonthNames = { 5:'may',6:'jun',7:'jul',8:'aug',9:'sep',10:'oct',11:'nov',12:'dec' };
   if (!periodRange.start || modalMonthKey === 'may') {
-    modalMonthKey = currentMonthNames[now.getMonth() + 1] || 'may';
+    modalMonthKey = currentMonthNames[ref.getMonth() + 1] || 'may';
   }
   rangeStartPending = null;
   renderCalModalBody(modalMonthKey);
@@ -139,9 +128,9 @@ function openCalModal() {
   if (periodRange.start && periodRange.end) {
     var s = pad(periodRange.start.day) + '/' + pad(periodRange.start.month);
     var e = pad(periodRange.end.day) + '/' + pad(periodRange.end.month);
-    document.getElementById('period-info').textContent = s + ' a ' + e + ' \u2014 clique para alterar';
+    document.getElementById('period-info').textContent = s + (s !== e ? ' a ' + e : '') + ' \u2014 clique em um dia para abrir';
   } else {
-    document.getElementById('period-info').textContent = 'Clique em dois dias para definir o per\u00edodo';
+    document.getElementById('period-info').textContent = 'Clique em um dia para abrir';
   }
   setTimeout(function() { document.addEventListener('keydown', calModalKeydown); }, 0);
 }
@@ -170,42 +159,40 @@ function modalNextMonth() {
 function calendarDayClick(dateStr) {
   if (!dateLookup[dateStr]) return;
 
-  if (!rangeStartPending) {
-    rangeStartPending = dateStr;
-    renderCalModalBody(modalMonthKey);
-    document.getElementById('period-info').innerHTML = '<span style="color:var(--navy);font-weight:600">In\u00edcio: ' + dateStr + '</span> \u2014 clique no dia final';
-    return;
-  }
-
-  if (dateStr === rangeStartPending) {
-    rangeStartPending = null;
-    renderCalModalBody(modalMonthKey);
-    document.getElementById('period-info').textContent = 'Clique em dois dias para definir o per\u00edodo';
-    return;
-  }
-
-  var startNum = dateToNum(rangeStartPending);
-  var endNum = dateToNum(dateStr);
-  var startStr = startNum <= endNum ? rangeStartPending : dateStr;
-  var endStr = startNum <= endNum ? dateStr : rangeStartPending;
-
-  periodRange = { start: parseDateStr(startStr), end: parseDateStr(endStr) };
+  periodRange = { start: parseDateStr(dateStr), end: parseDateStr(dateStr) };
   rangeStartPending = null;
-  selectedDateStr = startStr + ' - ' + endStr;
+  selectedDateStr = dateStr;
 
   updateTriggerLabel();
   closeCalModal();
-  setTimeout(function() { applyRange(startStr, endStr); }, 0);
+  setTimeout(function() { applyRange(dateStr, dateStr); }, 0);
 }
 
 function applyRange(startStr, endStr) {
   state.dadosCompletos = getRangeAcumulado(startStr, endStr);
   filtrarDadosPorPermissao();
   var dayNames = { d1: 'Segunda-feira', d2: 'Ter\u00e7a-feira', d3: 'Quarta-feira', d4: 'Quinta-feira', d5: 'Sexta-feira' };
-  document.getElementById('page-sub').textContent = 'Per\u00edodo: ' + startStr + ' a ' + endStr;
+  document.getElementById('page-sub').textContent = startStr === endStr ? 'Data: ' + startStr : 'Per\u00edodo: ' + startStr + ' a ' + endStr;
   var titles = { geral: 'Vis\u00e3o Geral', hp: 'HP', urbi_recanto: 'URBI Recanto', urbi_samambaia: 'URBI Samambaia', maas: 'MAAS' };
   document.getElementById('page-title').textContent = titles[state.paginaAtual];
   atualizarDashboardCompleto();
+}
+
+function getYesterday() {
+  var d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d;
+}
+
+function findClosestAvailableDate() {
+  var d = getYesterday();
+  for (var i = 0; i < 7; i++) {
+    var dateStr = pad(d.getDate()) + '/' + pad(d.getMonth() + 1);
+    if (dateLookup[dateStr]) return dateStr;
+    d.setDate(d.getDate() - 1);
+  }
+  var keys = Object.keys(dateLookup);
+  return keys[keys.length - 1] || null;
 }
 
 /* Period presets */
@@ -217,34 +204,42 @@ function selectPeriodPreset(preset) {
   var customRange = document.getElementById('period-custom-range');
   customRange.classList.remove('open');
   periodRange = { start: null, end: null };
-  var today = new Date();
-  var todayStr = getTodayDateStr();
+  buildDateLookup();
+  var ref = getYesterday();
+  var refStr = pad(ref.getDate()) + '/' + pad(ref.getMonth() + 1);
 
   switch (preset) {
-    case 'day':
-      if (dateLookup[todayStr]) {
-        periodRange = { start: parseDateStr(todayStr), end: parseDateStr(todayStr) };
-        selectedDateStr = todayStr + ' - ' + todayStr;
+    case 'day': {
+      var closestStr = findClosestAvailableDate();
+      if (closestStr) {
+        periodRange = { start: parseDateStr(closestStr), end: parseDateStr(closestStr) };
+        selectedDateStr = closestStr + ' - ' + closestStr;
         updateTriggerLabel();
-        applyRange(todayStr, todayStr);
+        applyRange(closestStr, closestStr);
       } else {
-        document.getElementById('period-info').textContent = 'Hoje sem dados. Selecione um dia no calend\u00e1rio.';
+        document.getElementById('period-info').textContent = 'Nenhum dado dispon\u00edvel.';
       }
       break;
+    }
     case 'last7': {
-      var sevenDaysAgo = new Date(today);
-      sevenDaysAgo.setDate(today.getDate() - 7);
-      var startStr = pad(sevenDaysAgo.getDate()) + '/' + pad(sevenDaysAgo.getMonth() + 1);
-      var endStr = todayStr;
-      periodRange = { start: parseDateStr(startStr), end: parseDateStr(endStr) };
-      selectedDateStr = startStr + ' - ' + endStr;
-      updateTriggerLabel();
-      applyRange(startStr, endStr);
+      var endStr = findClosestAvailableDate();
+      if (endStr) {
+        var endDate = parseDateStr(endStr);
+        var endDateObj = new Date(2026, endDate.month - 1, endDate.day);
+        endDateObj.setDate(endDateObj.getDate() - 6);
+        var startStr = pad(endDateObj.getDate()) + '/' + pad(endDateObj.getMonth() + 1);
+        periodRange = { start: parseDateStr(startStr), end: parseDateStr(endStr) };
+        selectedDateStr = startStr + ' - ' + endStr;
+        updateTriggerLabel();
+        applyRange(startStr, endStr);
+      } else {
+        document.getElementById('period-info').textContent = 'Nenhum dado dispon\u00edvel.';
+      }
       break;
     }
     case 'month': {
-      var firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      var lastOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      var firstOfMonth = new Date(ref.getFullYear(), ref.getMonth(), 1);
+      var lastOfMonth = new Date(ref.getFullYear(), ref.getMonth() + 1, 0);
       var firstStr = pad(firstOfMonth.getDate()) + '/' + pad(firstOfMonth.getMonth() + 1);
       var lastStr = pad(lastOfMonth.getDate()) + '/' + pad(lastOfMonth.getMonth() + 1);
       periodRange = { start: parseDateStr(firstStr), end: parseDateStr(lastStr) };

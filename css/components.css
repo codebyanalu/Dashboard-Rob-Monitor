@@ -89,6 +89,13 @@
 }
 .kpi-sparkline-wrap svg { width: 100%; }
 
+.kpi-extra {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  margin-top: 3px;
+}
+
 .kpi-trend {
   font-size: 10px;
   color: rgba(255,255,255,0.65);

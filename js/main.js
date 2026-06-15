@@ -159,11 +159,7 @@ function initDashboard() {
     }
     buildDateLookup();
 
-    var targetStr = getYesterdayDateStr();
-    if (!dateLookup[targetStr]) {
-      var keys = Object.keys(dateLookup);
-      targetStr = keys[keys.length - 1] || null;
-    }
+    var targetStr = findClosestAvailableDate();
     if (targetStr) {
       periodRange = { start: parseDateStr(targetStr), end: parseDateStr(targetStr) };
       selectedDateStr = targetStr + ' - ' + targetStr;
@@ -331,11 +327,7 @@ if (sessao) {
       return;
     }
     buildDateLookup();
-    var targetStr = getYesterdayDateStr();
-    if (!dateLookup[targetStr]) {
-      var keys = Object.keys(dateLookup);
-      targetStr = keys[keys.length - 1] || null;
-    }
+    var targetStr = findClosestAvailableDate();
     if (targetStr) {
       periodRange = { start: parseDateStr(targetStr), end: parseDateStr(targetStr) };
       selectedDateStr = targetStr + ' - ' + targetStr;

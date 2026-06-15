@@ -71,43 +71,33 @@ function atualizarKPICards() {
   var prevEfic    = prevTotais && prevTotais.totalMonitor > 0 ? ((prevTotais.totalRobo / prevTotais.totalMonitor) * 100) : 0;
   var tEfic       = prevEfic > 0 ? { diff: parseFloat(efic) - prevEfic, pct: (parseFloat(efic) - prevEfic).toFixed(1), positive: parseFloat(efic) >= prevEfic } : null;
 
-  function setCard(id, val, sparkData, color, trend, invertGood, extraHTML) {
+  function setCard(id, val, sparkData, extraHTML) {
     var el = document.getElementById(id);
     if (!el) return;
     var spark = generateSparkline(sparkData, 'rgba(255,255,255,0.7)');
-    var trendHTML = renderTrendHTML(trend, invertGood);
     el.querySelector('.kpi-value-num').textContent = val;
     var sp = el.querySelector('.kpi-sparkline-wrap');
     if (sp) sp.innerHTML = spark;
-    var tr = el.querySelector('.kpi-trend');
-    if (tr) tr.innerHTML = trendHTML;
     if (extraHTML) {
       var ext = el.querySelector('.kpi-extra');
       if (ext) ext.innerHTML = extraHTML;
     }
   }
 
-  setCard('kpi-monitor', monitor, monitorSeries, 'white', tMonitor, false);
-  setCard('kpi-robo', robo, roboSeries, 'white', tRobo, false);
-  setCard('kpi-prenota', prenota, prenotaSeries, 'white', tPrenota, false);
-  // Total de Notas = Monitor + Pré-nota
-  setCard('kpi-gap', totalNotas, totalNotasSeries, 'white', tTotalNotas, false);
+  var pctMonitor = totalNotas > 0 ? (monitor / totalNotas * 100).toFixed(1) : '0.0';
+  var pctPrenota = totalNotas > 0 ? (prenota / totalNotas * 100).toFixed(1) : '0.0';
+  var pctRobo = totalNotas > 0 ? (robo / totalNotas * 100).toFixed(1) : '0.0';
+
+  setCard('kpi-monitor', monitor, monitorSeries, pctMonitor + '% do total');
+  setCard('kpi-robo', robo, roboSeries, pctRobo + '% do total');
+  setCard('kpi-prenota', prenota, prenotaSeries, pctPrenota + '% do total');
+  setCard('kpi-gap', totalNotas, totalNotasSeries);
 
   var efEl = document.getElementById('kpi-eficiencia');
   if (efEl) {
     efEl.querySelector('.kpi-value-num').textContent = efic + '%';
     var pf = efEl.querySelector('.kpi-progress-fill');
     if (pf) pf.style.width = Math.min(100, efic) + '%';
-    var tr = efEl.querySelector('.kpi-trend');
-    if (tr) {
-      if (tEfic) {
-        var sign = tEfic.positive ? '▲' : '▼';
-        var cls = tEfic.positive ? 'trend-up' : 'trend-down';
-        tr.innerHTML = '<span class="' + cls + '">' + sign + ' ' + Math.abs(tEfic.pct) + 'pp</span> vs período anterior';
-      } else {
-        tr.innerHTML = '<span class="trend-neutral">— vs período anterior</span>';
-      }
-    }
   }
 
   atualizarSidebarFooter();
@@ -405,11 +395,9 @@ function atualizarCardsGerais() {
 /**
  * Gera o HTML padronizado de um card de empresa com a estética premium da Visão Geral.
  */
-function buildKpiCardHtml(gradient, title, value, iconSvg, trendText) {
-  var trendHtml = trendText 
-    ? '<div class="kpi-trend"><span class="trend-neutral">' + trendText + '</span></div>'
-    : '<div class="kpi-trend"></div>';
-    
+function buildKpiCardHtml(gradient, title, value, iconSvg, extraHtml) {
+  var extra = extraHtml ? '<div class="kpi-extra">' + extraHtml + '</div>' : '';
+
   return '<div class="kpi-card" style="background:' + gradient + '">' +
     '<div class="kpi-header">' +
       '<span class="kpi-label">' + title + '</span>' +
@@ -417,7 +405,7 @@ function buildKpiCardHtml(gradient, title, value, iconSvg, trendText) {
     '</div>' +
     '<div class="kpi-value-num">' + value + '</div>' +
     '<div class="kpi-sparkline-wrap"></div>' +
-    trendHtml +
+    extra +
   '</div>';
 }
 
@@ -444,7 +432,7 @@ function atualizarCardsEmpresa(emp, containerId, nome) {
   var icons        = getCompanyCardIcons();
 
   document.getElementById(containerId).innerHTML =
-    buildKpiCardHtml('linear-gradient(135deg,#1565C0,#1976D2)', 'Total de Notas', totalNotas, icons.total, respText || 'Monitor + Pré-nota') +
+    buildKpiCardHtml('linear-gradient(135deg,#1565C0,#1976D2)', 'Total de Notas', totalNotas, icons.total) +
     buildKpiCardHtml('linear-gradient(135deg,#047857,#059669)', 'Monitor', d.monitor, icons.monitor, pctMonitor + '% do total') +
     buildKpiCardHtml('linear-gradient(135deg,#5B21B6,#7C3AED)', 'Pré-nota', d.prenota, icons.prenota, pctPrenota + '% do total') +
     buildKpiCardHtml('linear-gradient(135deg,#B45309,#D97706)', 'Robô', d.robo, icons.robo, pctRoboMon + '% de eficiência') +
@@ -472,7 +460,7 @@ function atualizarCardsMaas() {
     var personGrad = 'linear-gradient(135deg,' + person.cor + ',' + person.cor + ')';
 
     document.getElementById('maas-cards').innerHTML =
-      buildKpiCardHtml(personGrad, 'Total de Notas', totalNotas, icons.total, person.nome.split(' ')[0]) +
+      buildKpiCardHtml(personGrad, 'Total de Notas', totalNotas, icons.total) +
       buildKpiCardHtml('linear-gradient(135deg,#047857,#059669)', 'Monitor', personData.monitor, icons.monitor, pctMonitor + '% do total') +
       buildKpiCardHtml('linear-gradient(135deg,#5B21B6,#7C3AED)', 'Pré-nota', personData.prenota, icons.prenota, pctPrenota + '% do total') +
       buildKpiCardHtml('linear-gradient(135deg,#B45309,#D97706)', 'Robô', personData.robo, icons.robo, pctRoboMon + '% de eficiência') +
@@ -564,7 +552,7 @@ function atualizarTabelaEmpresa(emp, containerId, nome) {
 
 /* ── EMPRESA EXTRA SECTIONS ── */
 function renderEmpresaTrendChart(containerId, days, empCor) {
-  if (!days || days.length < 2) return;
+  if (!days || days.length < 1) return;
   var labels  = days.map(function(d) { return d.dateStr; });
   var monitor = days.map(function(d) { return d.monitor; });
   var prenota = days.map(function(d) { return d.prenota; });
@@ -761,7 +749,7 @@ function atualizarEmpresaExtra(empresaId, empresaNome, empCor) {
   var s = pad(periodRange.start.day) + '/' + pad(periodRange.start.month);
   var e = pad(periodRange.end.day) + '/' + pad(periodRange.end.month);
   var days = getRangeDiarioEmpresa(empresaId, s, e);
-  if (days && days.length >= 2) {
+  if (days && days.length > 0) {
     renderEmpresaTrendChart(empresaId + '_trend_vol', days, empCor);
     renderTrendDetailTable(empresaId + '-trend-detail', days);
   }
