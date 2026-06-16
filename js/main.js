@@ -22,7 +22,7 @@ function atualizarDashboardCompleto() {
     atualizarProgressoEmpresa('urbi_recanto', 'rec-progress');
     atualizarTabelaEmpresa('urbi_recanto', 'rec-dist-detail', 'URBI Recanto');
     atualizarInsightEmpresa('urbi_recanto', 'insight-rec', 'URBI Recanto');
-    atualizarEmpresaExtra('urbi_recanto', 'URBI Recanto', '#2E7D32');
+    atualizarEmpresaExtra('urbi_recanto', 'URBI Recanto', '#2E7D32', 'rec');
   }
 
   if (empresasIds.indexOf('urbi_samambaia') !== -1) {
@@ -31,7 +31,7 @@ function atualizarDashboardCompleto() {
     atualizarProgressoEmpresa('urbi_samambaia', 'sam-progress');
     atualizarTabelaEmpresa('urbi_samambaia', 'sam-dist-detail', 'URBI Samambaia');
     atualizarInsightEmpresa('urbi_samambaia', 'insight-sam', 'URBI Samambaia');
-    atualizarEmpresaExtra('urbi_samambaia', 'URBI Samambaia', '#ED6C02');
+    atualizarEmpresaExtra('urbi_samambaia', 'URBI Samambaia', '#ED6C02', 'sam');
   }
 
   if (empresasIds.indexOf('maas') !== -1) {

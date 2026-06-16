@@ -743,21 +743,22 @@ function renderPieDetailTable(containerId, empresaId, personId) {
   el.innerHTML = html;
 }
 
-function atualizarEmpresaExtra(empresaId, empresaNome, empCor) {
+function atualizarEmpresaExtra(empresaId, empresaNome, empCor, containerPrefix) {
   var personId = empresaId === 'maas' ? getMaasPersona() : null;
   if (!periodRange.start || !periodRange.end) return;
   var s = pad(periodRange.start.day) + '/' + pad(periodRange.start.month);
   var e = pad(periodRange.end.day) + '/' + pad(periodRange.end.month);
   var days = getRangeDiarioEmpresa(empresaId, s, e);
+  var prefix = containerPrefix || empresaId;
   if (days && days.length > 0) {
-    renderEmpresaTrendChart(empresaId + '_trend_vol', days, empCor);
-    renderTrendDetailTable(empresaId + '-trend-detail', days);
+    renderEmpresaTrendChart(prefix + '_trend_vol', days, empCor);
+    renderTrendDetailTable(prefix + '-trend-detail', days);
   }
-  renderBarDetailTable(empresaId + '-bar-detail', empresaId, personId);
-  renderPieDetailTable(empresaId + '-pie-detail', empresaId, personId);
-  renderTopGapEmpresa(empresaId + '-topgap', empresaId, personId);
-  renderAlertasEmpresa(empresaId + '-alertas', empresaId, empresaNome, personId);
-  renderTrendCards(empresaId + '-trends', empresaId, empCor, personId);
+  renderBarDetailTable(prefix + '-bar-detail', empresaId, personId);
+  renderPieDetailTable(prefix + '-pie-detail', empresaId, personId);
+  renderTopGapEmpresa(prefix + '-topgap', empresaId, personId);
+  renderAlertasEmpresa(prefix + '-alertas', empresaId, empresaNome, personId);
+  renderTrendCards(prefix + '-trends', empresaId, empCor, personId);
 }
 
 function atualizarEmpresaExtraMaas() {
