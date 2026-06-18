@@ -2625,39 +2625,39 @@
             },
             "d3": {
               "hp": {
-                "monitor": 0,
-                "prenota": 0,
-                "robo": 0,
-                "total": 0
+                "monitor": 22,
+                "prenota": 9,
+                "robo": 14,
+                "total": 31
               },
               "urbi_recanto": {
-                "monitor": 0,
-                "prenota": 0,
-                "robo": 0,
-                "total": 0
+                "monitor": 10,
+                "prenota": 1,
+                "robo": 9,
+                "total": 11
               },
               "urbi_samambaia": {
-                "monitor": 0,
-                "prenota": 0,
-                "robo": 0,
-                "total": 0
+                "monitor": 10,
+                "prenota": 5,
+                "robo": 8,
+                "total": 15
               },
               "maas": {
-                "monitor": 0,
-                "prenota": 0,
-                "robo": 0,
-                "total": 0,
+                "monitor": 13,
+                "prenota": 20,
+                "robo": 7,
+                "total": 33,
                 "responsavel1": {
-                  "monitor": 0,
-                  "prenota": 0,
-                  "robo": 0,
-                  "total": 0
+                  "monitor": 8,
+                  "prenota": 13,
+                  "robo": 3,
+                  "total": 21
                 },
                 "responsavel2": {
-                  "monitor": 0,
-                  "prenota": 0,
-                  "robo": 0,
-                  "total": 0
+                  "monitor": 5,
+                  "prenota": 7,
+                  "robo": 4,
+                  "total": 12
                 }
               }
             },
@@ -2817,39 +2817,39 @@
             },
             "d3": {
               "hp": {
-                "monitor": 0,
-                "prenota": 0,
-                "robo": 0,
-                "total": 0
+                "monitor": 22,
+                "prenota": 9,
+                "robo": 14,
+                "total": 31
               },
               "urbi_recanto": {
-                "monitor": 0,
-                "prenota": 0,
-                "robo": 0,
-                "total": 0
+                "monitor": 10,
+                "prenota": 1,
+                "robo": 9,
+                "total": 11
               },
               "urbi_samambaia": {
-                "monitor": 0,
-                "prenota": 0,
-                "robo": 0,
-                "total": 0
+                "monitor": 10,
+                "prenota": 5,
+                "robo": 8,
+                "total": 15
               },
               "maas": {
-                "monitor": 0,
-                "prenota": 0,
-                "robo": 0,
-                "total": 0,
+                "monitor": 13,
+                "prenota": 20,
+                "robo": 7,
+                "total": 33,
                 "responsavel1": {
-                  "monitor": 0,
-                  "prenota": 0,
-                  "robo": 0,
-                  "total": 0
+                  "monitor": 8,
+                  "prenota": 13,
+                  "robo": 3,
+                  "total": 21
                 },
                 "responsavel2": {
-                  "monitor": 0,
-                  "prenota": 0,
-                  "robo": 0,
-                  "total": 0
+                  "monitor": 5,
+                  "prenota": 7,
+                  "robo": 4,
+                  "total": 12
                 }
               }
             },
