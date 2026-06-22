@@ -94,7 +94,7 @@ function atualizarTendenciasSemanais() {
     tabelaEl.innerHTML = '<div style="text-align:center;padding:12px;font-size:11px;color:var(--gray-400)">Nenhum dia no período selecionado</div>';
   }
 
-  var lineLayout = {
+  var lineLayoutBase = {
     margin: { t: 10, l: 36, r: 8, b: 40 },
     xaxis: { tickfont: { family: 'Inter, sans-serif', size: 9, color: '#94A3B8' }, showgrid: false, zeroline: false, tickangle: -45 },
     yaxis: { tickfont: { family: 'Inter, sans-serif', size: 9, color: '#94A3B8' }, showgrid: true, gridcolor: '#F1F5F9', zeroline: false },
@@ -105,6 +105,11 @@ function atualizarTendenciasSemanais() {
     paper_bgcolor: CHART_BG,
     hoverlabel: { bgcolor: '#1E293B', font: { family: 'Inter, sans-serif', size: 10, color: '#fff' } }
   };
+
+  var lineLayoutVol = JSON.parse(JSON.stringify(lineLayoutBase));
+  var lineLayoutPct = JSON.parse(JSON.stringify(lineLayoutBase));
+  lineLayoutPct.yaxis.ticksuffix = '%';
+  lineLayoutPct.yaxis.range = [0, 110];
 
   Plotly.newPlot('g_tendencias_volume', [
     { x: labels, y: total, name: 'Total', type: 'scatter', mode: 'lines+markers',
@@ -122,7 +127,7 @@ function atualizarTendenciasSemanais() {
     { x: labels, y: gap, name: 'GAP', type: 'scatter', mode: 'lines+markers',
       line: { color: '#DC2626', width: 2 }, marker: { color: '#DC2626', size: 4 },
       hovertemplate: '%{y}<extra>GAP</extra>' }
-  ], lineLayout, { displayModeBar: false, responsive: true });
+  ], lineLayoutVol, { displayModeBar: false, responsive: true });
 
   Plotly.newPlot('g_tendencias_pct', [
     { x: labels, y: eficPct, name: '% Robô', type: 'scatter', mode: 'lines+markers',
@@ -134,9 +139,7 @@ function atualizarTendenciasSemanais() {
     { x: labels, y: prenotaPct, name: '% Pré-Nota', type: 'scatter', mode: 'lines+markers',
       line: { color: '#7C3AED', width: 2, dash: 'dot' }, marker: { color: '#7C3AED', size: 4 },
       hovertemplate: '%{y}%<extra>% Pré-Nota</extra>' }
-  ], Object.assign({}, lineLayout, {
-    yaxis: Object.assign({}, lineLayout.yaxis, { ticksuffix: '%', range: [0, 110] })
-  }), { displayModeBar: false, responsive: true });
+  ], lineLayoutPct, { displayModeBar: false, responsive: true });
 }
 
 /* ── COMPANY CHARTS ── */
