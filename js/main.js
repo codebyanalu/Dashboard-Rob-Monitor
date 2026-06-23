@@ -77,6 +77,7 @@ function showPage(id, el) {
   if (id === 'maas') renderPersonSelector('maas');
   if (id === 'relatorios') { atualizarTabelaConsolidada(); atualizarRanking(); }
   if (id === 'alertas') { atualizarAlertas(); }
+  if (id === 'geral') atualizarGraficosGerais();
 }
 window.showPage = showPage;
 

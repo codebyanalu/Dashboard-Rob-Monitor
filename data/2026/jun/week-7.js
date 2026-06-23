@@ -20,7 +20,7 @@ var DATA7 = {
     hp: { monitor: 18, prenota: 7, robo: 12, total: 25 },
     urbi_recanto: { monitor: 9, prenota: 2, robo: 9, total: 11 },
     urbi_samambaia: { monitor: 5, prenota: 4, robo: 5, total: 9 },
-    maas: { monitor: 12, prenota: 16, robo: 7, total: 28, responsavel1: { monitor: 7, prenota: 6, robo: 5, total: 13 }, responsavel2: { monitor: 5, prenota: 10, robo: 2, total: 15 }}
+    maas: { monitor: 12, prenota: 16, robo: 7, total: 28, responsavel1: { monitor: 7, prenota: 6, robo: 3, total: 13 }, responsavel2: { monitor: 5, prenota: 10, robo: 4, total: 15 }}
   },
   d2: {
     hp: { monitor: 25, prenota: 5, robo: 17, total: 30 },
