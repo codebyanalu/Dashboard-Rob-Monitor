@@ -38,7 +38,7 @@ var DATA5 = {
     hp: { monitor: 0, prenota: 0, robo: 0, total: 0 },
     urbi_recanto: { monitor: 0, prenota: 0, robo: 0, total: 0 },
     urbi_samambaia: { monitor: 0, prenota: 0, robo: 0, total: 0 },
-    maas: { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 }, responsavel2: { monitor: 0, prenota: 0, robo: 0, total: 0 }}
+    maas: { monitor: 0, prenota: 0, robo: 0, total: 0, responsavel1: { monitor: 0, prenota: 0, robo: 0, total: 0 }, responsavel2: { monitor: 0, prenota: 0, robo: 0, total: 0 } }
   },
   d5: {
     hp: { monitor: 21, prenota: 9, robo: 17, total: 30 },
